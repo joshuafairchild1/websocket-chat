@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web Socket Chatroom</title>
+  </head>
+  <script src="bundle.js" type="text/javascript" defer></script>
+  <body>
+    <div id="chat-container">
+      <h1 id="chat-header">What people are saying:</h1>
+      <div id="message-history">
+        <div id="identity-container">
+          <h5>Chatting as <span id="chat-identity"></span></h5>
+          <input id="username-input" type="hidden">
+          <button id="change-username-button">Change</button>
+          <button id="cancel-change-username-button" class="hidden">Cancel</button>
+        </div>
+        <div id="message-list">
+
+        </div>
+      </div>
+      <form id="chat-form">
+        <input type="text" id="chat-input">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </body>
+</html>

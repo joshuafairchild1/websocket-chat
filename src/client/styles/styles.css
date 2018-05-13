@@ -1,0 +1,45 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#chat-container, #message-history {
+  text-align: center;
+  height: 100%;
+}
+
+#message-history {
+  background-color: #ADD8E6;
+  opacity: 0.85;
+  height: 80%;
+  width: 60%;
+  margin: 0 auto;
+  position: relative
+}
+
+#message-history, #chat-identity {
+  text-align: left;
+}
+
+#identity-container h5 {
+  display: inline-block;
+}
+
+#identity-container {
+  vertical-align: top;
+  position: fixed;
+  height: 10%;
+}
+
+#message-list {
+  height: 90%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.hidden {
+  display: none !important;
+}
