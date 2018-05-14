@@ -1,8 +1,13 @@
 'use strict'
 
-export default class ChatRegistry {
+import { logger} from '../shared/utils.mjs'
+
+const log = logger('MessageRegistry')
+
+export default class MessageRegistry {
 
   constructor() {
+    /** @type {ChatMessage[]} */
     this._messages = []
   }
 
@@ -10,7 +15,7 @@ export default class ChatRegistry {
    * @param message {ChatMessage}
    */
   add(message) {
-    console.warn('saving message', message)
+    log('saving message', message)
     this._messages.push(message)
   }
 

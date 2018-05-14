@@ -1,54 +1,49 @@
 'use strict'
 
-import MESSAGE_TYPE from '../shared/MessageType'
-import WebSocketMessage from '../shared/model/WebSocketMessage'
-import { randomId } from '../shared/utils'
+import { ensure, logger } from '../shared/utils'
 import ChatMessage from '../shared/model/ChatMessage'
-import ChatRegistry from './ChatRegistry'
+import ChatRoom from './ChatRoom'
+import ConnectPayload from '../shared/model/ConnectPayload'
+import MessageRegistry from './MessageRegistry'
+import MessageType from '../shared/MessageType'
+import WebSocketMessage from '../shared/model/WebSocketMessage'
+import MessageStrategy from './MessageStrategy'
 
-const log = (...statements) => console.log('[ChatTransport]', ...statements)
-
-class User {
-  constructor(connection, name = null) {
-    this.clientId = randomId()
-    this.name = name || 'Anonymous'
-    this.connection = connection
-  }
-}
+const log = logger('ChatTransport')
 
 export default class ChatTransport {
 
   constructor() {
-    /** @type {Map.<string, User>} */
-    this._clients = new Map()
-    this._chatMessages = new ChatRegistry()
+    const { connect, disconnect, sendChat, setUsername } = MessageType.client
+    this._room = new ChatRoom(new MessageRegistry())
+    new MessageStrategy(connect, this._handleConnect)
+    new MessageStrategy(disconnect, (_, message) => this._handleDisconnect(message))
+    new MessageStrategy(sendChat, (_, message) => this._handleChatMessage(new ChatMessage(
+      message.clientId, message.payload.senderName, message.payload.content)))
+    new MessageStrategy(setUsername, this._handleNewUsername.bind(this))
   }
 
   /**
    * @param connection {WebSocketConnection}
    */
   registerConnection(connection) {
-    connection.on('message', message => this._onMessage(message, connection))
+    connection.on('message', message => this._onMessage(connection, message))
   }
 
   /**
-   * @param message {*}
    * @param connection {WebSocketConnection}
+   * @param message {*}
    * @private
    */
-  _onMessage(message, connection) {
-    if (message.type === 'utf8') {
-      const { connect, disconnect, sendChat, setUsername } = MESSAGE_TYPE.client
-      message = WebSocketMessage.fromString(message.utf8Data)
-      log('received message', message)
-      switch (message.type) {
-        case connect: return this._handleConnect(connection)
-        case disconnect: return this._handleDisconnect(message.clientId)
-        case sendChat: return this._handleChatMessage(new ChatMessage(
-          message.clientId, message.payload.senderName, message.payload.content))
-        case setUsername: return this._handleNewUsername(message, connection)
-      }
+  _onMessage(connection, message) {
+    log('received message', message)
+    if (message.type === 'utf8' && message.utf8Data) {
+      message = WebSocketMessage.fromString(message.utf8Data, 'client')
+      const type = MessageType.forName(message.type)
+      MessageStrategy.callFor(type, this, connection, message)
+      return
     }
+    throw Error('message did not contain utf8 string data')
   }
 
   /**
@@ -56,11 +51,10 @@ export default class ChatTransport {
    * @private
    */
   _handleConnect(connection) {
-    const user = new User(connection)
-    const { clientId } = user
-    this._clients.set(clientId, user)
-    connection.sendUTF(new WebSocketMessage(MESSAGE_TYPE.server.newConnection,
-      { clientId, messages: this._chatMessages.getAll() }).forTransport())
+    const { clientId } = this._room.newUser(connection)
+    const payload = new ConnectPayload(clientId, this._room.getMessages())
+    connection.sendUTF(new WebSocketMessage(
+      MessageType.server.newConnection, payload).forTransport())
   }
 
   /**
@@ -68,12 +62,10 @@ export default class ChatTransport {
    * @private
    */
   _handleDisconnect(clientId) {
-    const client = this._clients.get(clientId)
-    this._clients.delete(clientId)
-    log('client', clientId, 'disconnected',
-      this._clients.size, 'connections remaining')
+    ensure(clientId, String, 'client ID')
+    this._room.userLeft(clientId)
     const message = new ChatMessage(
-      clientId, client.name || clientId, `User ${clientId} has disconnected`)
+      clientId, 'System', `User ${clientId} has disconnected`)
     this._handleChatMessage(message)
   }
 
@@ -82,28 +74,23 @@ export default class ChatTransport {
    * @private
    */
   _handleChatMessage(message) {
-    this._chatMessages.add(message)
+    this._room.addMessage(message)
     this._sendToAll(new WebSocketMessage(
-      MESSAGE_TYPE.server.newMessage, message, message.senderId).forTransport())
+      MessageType.server.newMessage, message, message.senderId).forTransport())
   }
 
   /**
-   * @param message {WebSocketMessage}
    * @param connection {WebSocketConnection}
+   * @param message {WebSocketMessage}
    * @private
    */
-  _handleNewUsername(message, connection) {
-    const { clientId, payload } = message
-    const user = this._clients.get(clientId)
-    if (!user) {
-      throw Error('could not locate user ' + clientId)
-    }
-    user.name = payload
-    this._chatMessages.updateNameFor(clientId, payload)
+  _handleNewUsername(connection, message) {
+    const { clientId, payload: name } = message
+    this._room.newUsername(clientId, name)
     connection.sendUTF(new WebSocketMessage(
-      MESSAGE_TYPE.server.updateUsername, payload).forTransport())
+      MessageType.server.updateUsername, name).forTransport())
     this._sendToAll(new WebSocketMessage(
-      MESSAGE_TYPE.server.updateMessages, this._chatMessages.getAll())
+      MessageType.server.updateMessages, this._room.getMessages())
         .forTransport())
   }
 
@@ -112,11 +99,9 @@ export default class ChatTransport {
    * @private
    */
   _sendToAll(message) {
-    if (typeof message !== 'string') {
-      message = JSON.stringify(message)
-    }
+    ensure(message, String, 'stringified WebSocketMessage')
     log('sending message to all', message)
-    this._clients.forEach(user => user.connection.sendUTF(message))
+    this._room.forEachUser(user => user.connection.sendUTF(message))
   }
 
 }

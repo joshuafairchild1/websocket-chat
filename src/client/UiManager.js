@@ -1,14 +1,23 @@
 'use strict'
 
-import MESSAGE_TYPE from '../shared/MessageType'
-import { findElement, makeHandlerHelper } from '../shared/utils'
+import { ensure, findElement, listenForClick, logger, makeHandlerHelper }
+  from '../shared/utils'
 import moment from 'moment'
+import WebSocketClient from './WebSocketClient'
+import ChatMessage from '../shared/model/ChatMessage'
+import MessageType from '../shared/MessageType'
+
+const { server, client } = MessageType
 
 /**
  * @param {ChatMessage}
  * @private
  */
 function renderMessage({ senderId, senderName, timestamp, content }) {
+  ensure(senderId, String, 'sender ID')
+  ensure(senderName, String, 'sender name')
+  ensure(timestamp, String, 'message timestamp')
+  ensure(content, String, 'message content')
   const container = findElement('#message-list')
   container.insertAdjacentHTML('beforeend',
     `<p class="chat-message">${senderName || senderId}`
@@ -20,6 +29,7 @@ function renderMessage({ senderId, senderName, timestamp, content }) {
  * @param messages {ChatMessage[]}
  */
 function updateMessages(messages) {
+  ensure(messages, Array, 'chat messages')
   document.querySelectorAll('.chat-message')
     .forEach(el => el.parentElement.removeChild(el))
   messages.forEach(renderMessage)
@@ -29,8 +39,11 @@ function updateMessages(messages) {
  * @param name {string}
  */
 function updateUsername(name) {
+  ensure(name, String, 'username')
   findElement('#chat-identity').textContent = name
 }
+
+const log = logger('UiManager')
 
 export default class UiManager {
 
@@ -38,21 +51,22 @@ export default class UiManager {
    * @param client {WebSocketClient}
    */
   constructor(client) {
+    ensure(client, WebSocketClient, 'web socket client')
     this._client = client
     this._setUpHandlers()
   }
 
   _setUpHandlers() {
-    const { server } = MESSAGE_TYPE
     const { _client } = this
     const handleMessage = makeHandlerHelper(_client, 'addMessageHandler', this)
-    const handleEvent = el => makeHandlerHelper(findElement(el), 'addEventListener', this)
+    const handleEvent = el => makeHandlerHelper(
+      findElement(el), 'addEventListener', this)
     handleEvent('#chat-form')('submit', this._handleFormSubmit)
     handleEvent('#change-username-button')('click', this._changeUsername)
-    handleMessage(server.newConnection, this._userConnected)
-    handleMessage(server.newMessage, renderMessage)
-    handleMessage(server.updateUsername, updateUsername)
-    handleMessage(server.updateMessages, updateMessages)
+    handleMessage(server.newConnection.name, this._userConnected)
+    handleMessage(server.newMessage.name, renderMessage)
+    handleMessage(server.updateUsername.name, updateUsername)
+    handleMessage(server.updateMessages.name, updateMessages)
   }
 
   /**
@@ -64,12 +78,12 @@ export default class UiManager {
     const [ input ] = event.target
     const { value } = input
     if (!value) {
-      console.log('not sending an empty message')
+      log('not sending an empty message')
       return
     }
-    const senderName = findElement('#chat-identity').textContent
-    this._client.sendMessage(
-      MESSAGE_TYPE.client.sendChat, { senderName, content: value })
+    const name = findElement('#chat-identity').textContent
+    const message = new ChatMessage(this._client.id, name, value)
+    this._client.sendMessage(client.sendChat, message)
     input.value = ''
   }
 
@@ -77,15 +91,9 @@ export default class UiManager {
     findElement('#username-input').type = 'text'
     const chatInput = findElement('#chat-input')
     const usernameInput = findElement('#username-input')
-    chatInput.disabled = true
     const identity = findElement('#chat-identity')
-    identity.classList.add('hidden')
     const saveButton = findElement('#change-username-button')
     const cancelButton = findElement('#cancel-change-username-button')
-    cancelButton.classList.remove('hidden')
-    saveButton.textContent = 'Save'
-    const listenForClick = el => new Promise(resolve =>
-      el.addEventListener('click', resolve.bind(this)))
     const saveButtonClicked = listenForClick(saveButton)
     const cancelButtonClicked = listenForClick(cancelButton)
     const resetUi = () => {
@@ -96,26 +104,31 @@ export default class UiManager {
       identity.classList.remove('hidden')
       chatInput.disabled = false
     }
-    saveButtonClicked
-      .then(() => {
+    chatInput.disabled = true
+    identity.classList.add('hidden')
+    cancelButton.classList.remove('hidden')
+    saveButton.textContent = 'Save'
+    cancelButtonClicked
+      .then(resetUi).catch(console.error)
+    saveButtonClicked.then(() => {
         const { value } = usernameInput
         if (!value) {
-          console.log('not setting name to empty string')
+          log('not setting name to empty string')
           return
         }
-        this._client.sendMessage(MESSAGE_TYPE.client.setUsername, value)
+        this._client.sendMessage(client.setUsername, value)
         resetUi()
-      })
-    cancelButtonClicked.then(resetUi)
+      }).catch(console.error)
   }
 
   /**
-   * @param {{ clientId: string, messages: object[] }}
+   * @param {ConnectPayload}
    * @private
    */
   _userConnected({ clientId, messages }) {
+    ensure(clientId, String, 'clientId')
     findElement('#chat-identity').textContent = clientId
-    this._client.setId(clientId)
+    this._client.id = clientId
     updateMessages(messages)
   }
 

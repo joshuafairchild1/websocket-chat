@@ -1,8 +1,9 @@
 'use strict'
 
-import MESSAGE_TYPE from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
-import { APP_PORT, makeHandlerHelper, toJson } from '../shared/utils'
+import { APP_PORT, ensure, logger, makeHandlerHelper, toJson }
+  from '../shared/utils'
+import MessageType from '../shared/MessageType'
 
 const STARTUP_TIMEOUT = 5 * 1000
 const WS_READY_STATES = {
@@ -12,9 +13,11 @@ const WS_READY_STATES = {
 	CLOSED: 3
 }
 
+const log = logger('WebSocketClient')
 
 export default class WebSocketClient {
 	constructor(port) {
+	  ensure(port, Number, 'port number')
 		const socket = this._socket = new WebSocket(`ws://localhost:${port}`)
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
     handle('open', this._onOpen)
@@ -30,41 +33,58 @@ export default class WebSocketClient {
     this._id = null
 	}
 
-	setId(clientId) {
+	set id(clientId) {
+	  ensure(clientId, String, 'client ID')
 	  this._id = clientId
   }
 
+  get id() {
+	  return this._id
+  }
+
+  /**
+   * @param type {string}
+   * @param handler {Function}
+   * @param receiver {*}
+   */
 	addMessageHandler(type, handler, receiver = null) {
-		if (!MESSAGE_TYPE.server[type]) {
-			throw Error('invalid message type: ' + type)
-		}
+	  ensure(type, String, 'message type name')
+    ensure(handler, Function, 'handler function')
+    MessageType.validate(type)
 		this._messageHandlers.set(type, handler.bind(receiver))
 	}
 
 	_onOpen() {
-		this.sendMessage(MESSAGE_TYPE.client.connect)
+	  log('web socket connection opened')
+		this.sendMessage(MessageType.client.connect)
 	}
 
 	_onClose() {
-		this.sendMessage(MESSAGE_TYPE.client.disconnect)
+    log('web socket connection closed')
+		this.sendMessage(MessageType.client.disconnect)
 	}
 
+  /**
+   * @param type {MessageType}
+   * @param payload {*|null}
+   */
 	sendMessage(type, payload = null) {
-	  if (!this._id && type !== MESSAGE_TYPE.client.connect) {
+	  ensure(type, MessageType, 'message type')
+	  if (!this._id && type !== MessageType.client.connect) {
 	    throw Error('client ID is required to send a message')
     }
 		const message = new WebSocketMessage(type, payload, this._id).forTransport()
-		console.log('sending message', message)
+		log('sending message', message)
 		this._socket.send(message)
 	}
 
 	_onMessage(messageEvent) {
 		const { data, origin } = messageEvent
 		if (origin !== 'ws://localhost:' + APP_PORT) {
-			console.warn('message received from non-local origin', origin)
+			log('message received from non-local origin', origin)
 			return
 		}
-		console.log('received message', data)
+		log('received message', data)
 		const { type, payload } = toJson(data)
 		this._handlerFor(type)(payload)
 	}
