@@ -4,6 +4,7 @@ import WebSocketMessage from '../shared/model/WebSocketMessage'
 import { APP_PORT, ensure, logger, makeHandlerHelper, toJson }
   from '../shared/utils'
 import MessageType from '../shared/MessageType'
+import MessageStrategy from '../shared/MessageStrategy'
 
 const STARTUP_TIMEOUT = 5 * 1000
 const WS_READY_STATES = {
@@ -15,13 +16,24 @@ const WS_READY_STATES = {
 
 const log = logger('WebSocketClient')
 
+function callStrategy(messageEvent) {
+  const { data, origin } = messageEvent
+  if (origin !== 'ws://localhost:' + APP_PORT) {
+    log('message received from non-local origin', messageEvent)
+    return
+  }
+  log('received message', data)
+  const { type, payload } = toJson(data)
+  MessageStrategy.callFor(MessageType.forName(type), payload)
+}
+
 export default class WebSocketClient {
 	constructor(port) {
 	  ensure(port, Number, 'port number')
 		const socket = this._socket = new WebSocket(`ws://localhost:${port}`)
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
     handle('open', this._onOpen)
-    handle('message', this._onMessage)
+    handle('message', callStrategy)
     handle('close', this._onClose)
     handle('error', ex => console.error('web socket exception:', ex))
 		setTimeout(() => {
@@ -43,28 +55,6 @@ export default class WebSocketClient {
   }
 
   /**
-   * @param type {string}
-   * @param handler {Function}
-   * @param receiver {*}
-   */
-	addMessageHandler(type, handler, receiver = null) {
-	  ensure(type, String, 'message type name')
-    ensure(handler, Function, 'handler function')
-    MessageType.validate(type)
-		this._messageHandlers.set(type, handler.bind(receiver))
-	}
-
-	_onOpen() {
-	  log('web socket connection opened')
-		this.sendMessage(MessageType.client.connect)
-	}
-
-	_onClose() {
-    log('web socket connection closed')
-		this.sendMessage(MessageType.client.disconnect)
-	}
-
-  /**
    * @param type {MessageType}
    * @param payload {*|null}
    */
@@ -78,23 +68,14 @@ export default class WebSocketClient {
 		this._socket.send(message)
 	}
 
-	_onMessage(messageEvent) {
-		const { data, origin } = messageEvent
-		if (origin !== 'ws://localhost:' + APP_PORT) {
-			log('message received from non-local origin', origin)
-			return
-		}
-		log('received message', data)
-		const { type, payload } = toJson(data)
-		this._handlerFor(type)(payload)
+	_onOpen() {
+	  log('web socket connection opened')
+		this.sendMessage(MessageType.client.connect)
 	}
 
-	_handlerFor(type) {
-		const handler = this._messageHandlers.get(type)
-		if (!handler) {
-			throw Error('no handler for message type ' + type)
-		}
-		return handler
+	_onClose() {
+    log('web socket connection closed')
+		this.sendMessage(MessageType.client.disconnect)
 	}
-	
+
 }

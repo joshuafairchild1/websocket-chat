@@ -7,7 +7,7 @@ import ConnectPayload from '../shared/model/ConnectPayload'
 import MessageRegistry from './MessageRegistry'
 import MessageType from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
-import MessageStrategy from './MessageStrategy'
+import MessageStrategy from '../shared/MessageStrategy'
 
 const log = logger('ChatTransport')
 
@@ -16,34 +16,27 @@ export default class ChatTransport {
   constructor() {
     const { connect, disconnect, sendChat, setUsername } = MessageType.client
     this._room = new ChatRoom(new MessageRegistry())
-    new MessageStrategy(connect, this._handleConnect)
-    new MessageStrategy(disconnect, (_, message) => this._handleDisconnect(message))
+    new MessageStrategy(connect, this._handleConnect, this)
+    new MessageStrategy(disconnect, (_, message) => this._handleDisconnect(message), this)
     new MessageStrategy(sendChat, (_, message) => this._handleChatMessage(new ChatMessage(
-      message.clientId, message.payload.senderName, message.payload.content)))
-    new MessageStrategy(setUsername, this._handleNewUsername.bind(this))
+      message.clientId, message.payload.senderName, message.payload.content)), this)
+    new MessageStrategy(setUsername, this._handleNewUsername, this)
   }
 
   /**
    * @param connection {WebSocketConnection}
    */
   registerConnection(connection) {
-    connection.on('message', message => this._onMessage(connection, message))
-  }
-
-  /**
-   * @param connection {WebSocketConnection}
-   * @param message {*}
-   * @private
-   */
-  _onMessage(connection, message) {
-    log('received message', message)
-    if (message.type === 'utf8' && message.utf8Data) {
-      message = WebSocketMessage.fromString(message.utf8Data, 'client')
-      const type = MessageType.forName(message.type)
-      MessageStrategy.callFor(type, this, connection, message)
-      return
-    }
-    throw Error('message did not contain utf8 string data')
+    connection.on('message', message => {
+      log('received message', message)
+      if (message.type === 'utf8' && message.utf8Data) {
+        message = WebSocketMessage.fromString(message.utf8Data, 'client')
+        const type = MessageType.forName(message.type)
+        MessageStrategy.callFor(type, connection, message)
+        return
+      }
+      throw Error('message did not contain utf8 string data')
+    })
   }
 
   /**

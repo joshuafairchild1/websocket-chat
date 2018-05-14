@@ -6,6 +6,7 @@ import moment from 'moment'
 import WebSocketClient from './WebSocketClient'
 import ChatMessage from '../shared/model/ChatMessage'
 import MessageType from '../shared/MessageType'
+import MessageStrategy from '../shared/MessageStrategy'
 
 const { server, client } = MessageType
 
@@ -20,7 +21,7 @@ function renderMessage({ senderId, senderName, timestamp, content }) {
   ensure(content, String, 'message content')
   const container = findElement('#message-list')
   container.insertAdjacentHTML('beforeend',
-    `<p class="chat-message">${senderName || senderId}`
+    `<p class="chat-message">${senderName || senderId} `
     + `(${moment(timestamp).fromNow()}): ${content}</p>`)
   container.scrollTop = container.scrollHeight
 }
@@ -57,16 +58,14 @@ export default class UiManager {
   }
 
   _setUpHandlers() {
-    const { _client } = this
-    const handleMessage = makeHandlerHelper(_client, 'addMessageHandler', this)
     const handleEvent = el => makeHandlerHelper(
       findElement(el), 'addEventListener', this)
     handleEvent('#chat-form')('submit', this._handleFormSubmit)
     handleEvent('#change-username-button')('click', this._changeUsername)
-    handleMessage(server.newConnection.name, this._userConnected)
-    handleMessage(server.newMessage.name, renderMessage)
-    handleMessage(server.updateUsername.name, updateUsername)
-    handleMessage(server.updateMessages.name, updateMessages)
+    new MessageStrategy(server.newConnection, this._userConnected, this)
+    new MessageStrategy(server.newMessage, renderMessage)
+    new MessageStrategy(server.updateUsername, updateUsername)
+    new MessageStrategy(server.updateMessages, updateMessages)
   }
 
   /**
