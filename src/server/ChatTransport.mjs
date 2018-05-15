@@ -7,20 +7,21 @@ import ConnectPayload from '../shared/model/ConnectPayload'
 import MessageRegistry from './MessageRegistry'
 import MessageType from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
-import MessageStrategy from '../shared/MessageStrategy'
+import { MessageStrategy, ConnectStrategy, DisconnectStrategy, SendChatStrategy,
+  SetUsernameStrategy
+} from '../shared/MessageStrategy'
 
 const log = logger('ChatTransport')
 
 export default class ChatTransport {
 
   constructor() {
-    const { connect, disconnect, sendChat, setUsername } = MessageType.client
     this._room = new ChatRoom(new MessageRegistry())
-    new MessageStrategy(connect, this._handleConnect, this)
-    new MessageStrategy(disconnect, (_, message) => this._handleDisconnect(message), this)
-    new MessageStrategy(sendChat, (_, message) => this._handleChatMessage(new ChatMessage(
-      message.clientId, message.payload.senderName, message.payload.content)), this)
-    new MessageStrategy(setUsername, this._handleNewUsername, this)
+    new ConnectStrategy(this._handleConnect, this)
+    new DisconnectStrategy((_, message) => this._handleDisconnect(message))
+    new SendChatStrategy((_, message) => this._handleChatMessage(new ChatMessage(
+      message.clientId, message.payload.senderName, message.payload.content)))
+    new SetUsernameStrategy(this._handleNewUsername, this)
   }
 
   /**

@@ -4,7 +4,7 @@ import WebSocketMessage from '../shared/model/WebSocketMessage'
 import { APP_PORT, ensure, logger, makeHandlerHelper, toJson }
   from '../shared/utils'
 import MessageType from '../shared/MessageType'
-import MessageStrategy from '../shared/MessageStrategy'
+import { MessageStrategy } from '../shared/MessageStrategy'
 
 const STARTUP_TIMEOUT = 5 * 1000
 const WS_READY_STATES = {

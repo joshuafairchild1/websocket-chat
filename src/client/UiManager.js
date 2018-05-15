@@ -6,9 +6,12 @@ import moment from 'moment'
 import WebSocketClient from './WebSocketClient'
 import ChatMessage from '../shared/model/ChatMessage'
 import MessageType from '../shared/MessageType'
-import MessageStrategy from '../shared/MessageStrategy'
+import {
+  NewConnectionStrategy, NewMessageStrategy, UpdateMessagesStrategy,
+  UpdateUsernameStrategy
+} from '../shared/MessageStrategy'
 
-const { server, client } = MessageType
+const { client } = MessageType
 
 /**
  * @param {ChatMessage}
@@ -62,10 +65,10 @@ export default class UiManager {
       findElement(el), 'addEventListener', this)
     handleEvent('#chat-form')('submit', this._handleFormSubmit)
     handleEvent('#change-username-button')('click', this._changeUsername)
-    new MessageStrategy(server.newConnection, this._userConnected, this)
-    new MessageStrategy(server.newMessage, renderMessage)
-    new MessageStrategy(server.updateUsername, updateUsername)
-    new MessageStrategy(server.updateMessages, updateMessages)
+    new NewConnectionStrategy(this._userConnected, this)
+    new NewMessageStrategy(renderMessage)
+    new UpdateUsernameStrategy(updateUsername)
+    new UpdateMessagesStrategy(updateMessages)
   }
 
   /**
