@@ -15,14 +15,11 @@ export function randomId() {
  * @param receiver {*}
  * @return {Function}
  */
-export function makeHandlerHelper(consumer, methodName, receiver = this) {
-  ensure(methodName, String, 'method name')
+export function makeHandlerHelper(consumer: any, methodName: string, receiver = this) {
   if (!consumer || !consumer[methodName]) {
     throw Error(`method ${methodName} not present on ${consumer}`)
   }
-  return (eventName, handler) => {
-    ensure(eventName, String, 'event name')
-    ensure(handler, Function, 'handler function')
+  return (eventName: string, handler: Function) => {
     consumer[methodName](eventName, handler.bind(receiver))
   }
 }
@@ -31,8 +28,7 @@ export function makeHandlerHelper(consumer, methodName, receiver = this) {
  * @param selector {string}
  * @return {Element}
  */
-export function findElement(selector) {
-  ensure(selector, String, 'document element selector')
+export function findElement(selector: string) {
   if (!selector) {
     throw Error('selector required to find document element')
   }
@@ -47,7 +43,7 @@ export function findElement(selector) {
  * @param data {*}
  * @return {*}
  */
-export function toJson(data) {
+export function toJson(data: any) {
   try {
     return JSON.parse(data)
   } catch (ex) {
@@ -55,32 +51,27 @@ export function toJson(data) {
   }
 }
 
-/**
- * @param element {Element}
- * @return {Promise}
- */
-export const listenForClick = element => new Promise((resolve, reject) => {
-  if (!element || !element.addEventListener) {
-    reject(Error('not an HTML element: ' + element))
-  }
-  element.addEventListener('click', resolve.bind(this))
-})
+export const scrollToBottom = (el: Element) => {
+  el.scrollTop = el.scrollHeight
+}
 
-export const logger = (label) => {
-  ensure(label, String, 'logger label')
+export const listenForClick: (el: Element) => Promise<Event> = (element: Element) =>
+  new Promise((resolve, reject) => {
+    if (!element || !element.addEventListener) {
+      reject(Error('not an HTML element: ' + element))
+    }
+    element.addEventListener('click', resolve.bind(this))
+  })
+
+export const logger = (label: string) => {
   if (!label) {
     throw Error('label required')
   }
-  return (...statements) => console.log(`[${label}]`, ...statements)
+  return (...statements: any[]) => console.log(`[${label}]`, ...statements)
 }
 
-/**
- * @param value {*}
- * @param type {*}
- * @param label {string}
- */
-export function ensure(value, type, label) {
-  if (!label || typeof label !== 'string') {
+export function ensure(value: any, type: any, label: string) {
+  if (!label) {
     throw Error('invalid "ensure" label: ' + label)
   }
   if (((value !== UNDEFINED) && (value !== null) && value.constructor === type)

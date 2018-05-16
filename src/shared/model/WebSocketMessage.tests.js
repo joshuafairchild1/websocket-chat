@@ -1,10 +1,10 @@
 'use strict'
 
 import assert from 'assert'
-import WebSocketMessage from './WebSocketMessage.mjs'
-import MessageType from '../MessageType.mjs'
-import ChatMessage from './ChatMessage.mjs'
-import ConnectPayload from './ConnectPayload.mjs'
+import WebSocketMessage from './WebSocketMessage.ts'
+import MessageType from '../MessageType.ts'
+import ChatMessage from './ChatMessage.ts'
+import ConnectPayload from './ConnectPayload.ts'
 
 const { server, client } = MessageType
 
@@ -25,7 +25,7 @@ describe('WebSocketMessage', function () {
     const message = new WebSocketMessage(
       client.sendChat, new ChatMessage('someId', 'someName', 'Hello'))
     const asString = JSON.stringify(message)
-    const asMessage = WebSocketMessage.fromString(asString, 'client')
+    const asMessage = WebSocketMessage.fromString(asString)
     assert.deepEqual(asMessage, message)
   })
 

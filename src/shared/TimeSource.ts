@@ -1,8 +1,8 @@
 'use strict'
 
-let currentTime = null
+let currentTime: number | null = null
 
-function date() {
+function date(): Date {
   return new Date(now())
 }
 

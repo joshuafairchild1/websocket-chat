@@ -1,9 +1,9 @@
 'use strict'
 
 import assert from 'assert'
-import MessageRegistry from './MessageRegistry.mjs'
-import ChatMessage from '../shared/model/ChatMessage.mjs'
-import TimeSource from '../shared/TimeSource.mjs'
+import MessageRegistry from './MessageRegistry.ts'
+import ChatMessage from '../shared/model/ChatMessage.ts'
+import TimeSource from '../shared/TimeSource.ts'
 
 describe('Message Registry', function () {
 
