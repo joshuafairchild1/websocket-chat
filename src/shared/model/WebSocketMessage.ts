@@ -1,6 +1,6 @@
 'use strict'
 
-import { ensure, toJson } from '../utils'
+import { toJson } from '../utils'
 import ChatMessage from './ChatMessage'
 import ConnectPayload from './ConnectPayload'
 import MessageType from '../MessageType'
@@ -22,7 +22,7 @@ const PAYLOAD_TYPES = {
  * if that message does not send a payload
  */
 function payloadTypeFor(messageType: string): Function  {
-  if (MessageType.forName(messageType).hasNoType()) {
+  if (MessageType.forName(messageType).hasNoPayload()) {
     return
   }
   const type = PAYLOAD_TYPES[messageType]
@@ -81,7 +81,9 @@ export default class WebSocketMessage {
   }
 
   static validatePayload(typeName: string, payload: MessagePayload) {
-    ensure(payload, payloadTypeFor(typeName), `payload for ${typeName}`)
+	  if (payload.constructor !== payloadTypeFor(typeName)) {
+	    throw Error(`payload not of type ${typeName} ${toJson(payload)}`)
+    }
   }
 
 }

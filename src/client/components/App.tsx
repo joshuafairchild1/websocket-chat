@@ -60,7 +60,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   private sendMessage(text: string) {
     const { webSocketClient } = this.props
-    const message = new ChatMessage(webSocketClient.id, name, text)
+    const message = new ChatMessage(webSocketClient.id, this.state.name, text)
     webSocketClient.sendMessage(client.sendChat, message)
   }
 

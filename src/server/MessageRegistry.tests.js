@@ -1,9 +1,9 @@
 'use strict'
 
-import assert from 'assert'
-import MessageRegistry from './MessageRegistry.ts'
-import ChatMessage from '../shared/model/ChatMessage.ts'
-import TimeSource from '../shared/TimeSource.ts'
+const assert = require('assert')
+const MessageRegistry = require('./MessageRegistry').default
+const ChatMessage = require('../shared/model/ChatMessage.ts').default
+const TimeSource = require('../shared/TimeSource.ts').default
 
 describe('Message Registry', function () {
 

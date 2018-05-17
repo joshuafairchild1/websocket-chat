@@ -7,16 +7,12 @@ const log = logger('MessageRegistry')
 
 export default class MessageRegistry {
 
-  private readonly messages: ChatMessage[]
-
-  constructor() {
-    this.messages = []
-  }
+  private readonly messages: ChatMessage[] = []
 
   add(message: ChatMessage) {
     const { messages } = this
     messages.push(message)
-    log(`saved message (${messages.length} total)`, message)
+    log(`${messages.length} messages total`)
   }
 
   getAll(): ChatMessage[] {

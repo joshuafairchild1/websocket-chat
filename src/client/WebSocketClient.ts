@@ -5,14 +5,12 @@ import { APP_PORT, logger, makeHandlerHelper }
 import { MessageStrategy } from '../shared/MessageStrategy'
 import MessageType from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
+import { ClientMessagePayload } from '../shared/Types'
 
 const STARTUP_TIMEOUT = 5 * 1000
-const WS_READY_STATES = {
-	CONNECTING: 0,
-	OPEN:	1,
-	CLOSING: 2,
-	CLOSED: 3
-}
+enum WS_READY_STATES {
+  // noinspection JSUnusedGlobalSymbols
+  CONNECTING, OPEN, CLOSING, CLOSED }
 
 const log = logger('WebSocketClient')
 
@@ -23,7 +21,7 @@ function callStrategy(message: MessageEvent) {
     return
   }
   const { type, payload } = WebSocketMessage.fromString(data)
-  log(`received message "${message && message.type}"`)
+  log(`received message "${type}"`)
   MessageStrategy.callFor(MessageType.forName(type), payload)
 }
 
@@ -35,8 +33,8 @@ export default class WebSocketClient {
 		const socket = this.socket = new WebSocket(`ws://localhost:${port}`)
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
     handle('message', callStrategy)
-    handle('open', this._onOpen)
-    handle('close', this._onClose)
+    handle('open', this.onOpen)
+    handle('close', this.onClose)
     handle('error', (ex: ErrorEvent) => console.error('web socket exception:', ex))
 		setTimeout(() => {
 			if (socket.readyState !== WS_READY_STATES.OPEN) {
@@ -62,12 +60,12 @@ export default class WebSocketClient {
 		this.socket.send(message)
 	}
 
-	_onOpen() {
+	private onOpen() {
 	  log('web socket connection opened')
 		this.sendMessage(MessageType.client.connect)
 	}
 
-	_onClose() {
+	private onClose() {
     log('web socket connection closed')
 		this.sendMessage(MessageType.client.disconnect)
 	}

@@ -2,8 +2,6 @@
 
 export const APP_PORT = 4200
 
-const UNDEFINED = (() => {})()
-
 // https://gist.github.com/gordonbrander/2230317
 export function randomId() {
   return '_' + Math.random().toString(36).substr(2, 9)
@@ -67,22 +65,5 @@ export const logger = (label: string) => {
   if (!label) {
     throw Error('label required')
   }
-  return (...statements: any[]) => console.log(`[${label}]`, ...statements)
-}
-
-export function ensure(value: any, type: any, label: string) {
-  if (!label) {
-    throw Error('invalid "ensure" label: ' + label)
-  }
-  if (((value !== UNDEFINED) && (value !== null) && value.constructor === type)
-    || value instanceof type) {
-    return
-  }
-  type = type.name || type
-  try {
-    value = JSON.stringify(value)
-  } catch (error) {
-    // not serializable
-  }
-  throw new Error(`expected "${label}" value "${value}" to be of type "${type}"`)
+  return (...statements: any[]) => console.log(`[ ${label} ]`, ...statements)
 }

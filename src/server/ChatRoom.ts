@@ -10,11 +10,9 @@ const log = logger('ChatRoom')
 
 export default class ChatRoom {
 
-  private readonly clients: Map<string, User>
+  private readonly clients: Map<string, User> = new Map()
 
-  constructor(private messages: MessageRegistry) {
-    this.clients = new Map()
-  }
+  constructor(private messages: MessageRegistry) {}
 
   addMessage(message: ChatMessage) {
     this.messages.add(message)
@@ -53,10 +51,10 @@ export default class ChatRoom {
       throw Error('could not locate user ' + clientId)
     }
     user.name = name
-    this._updateMessages(clientId, name)
+    this.updateMessages(clientId, name)
   }
 
-  _updateMessages(clientId: string, name: string) {
+  private updateMessages(clientId: string, name: string) {
     this.messages.updateNameFor(clientId, name)
   }
 

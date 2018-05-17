@@ -17,7 +17,7 @@ export default class MessageType {
     return this[NAME]
   }
 
-  hasNoType(): boolean {
+  hasNoPayload(): boolean {
     return this === MessageType.client.connect
       || this === MessageType.client.disconnect
   }

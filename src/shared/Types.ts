@@ -9,3 +9,7 @@ export type ServerMessagePayload = ConnectPayload
 export type ClientMessagePayload = ChatMessage | String | null
 
 export type MessagePayload = ClientMessagePayload | ServerMessagePayload
+
+export interface StringToString {
+  [key: string]: string
+}
