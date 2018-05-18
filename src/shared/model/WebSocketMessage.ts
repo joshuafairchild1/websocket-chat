@@ -21,9 +21,9 @@ const PAYLOAD_TYPES = {
  * Return the payload type associated with a given message type, or null
  * if that message does not send a payload
  */
-function payloadTypeFor(messageType: string): Function  {
+function payloadTypeFor(messageType: string): Function | null  {
   if (MessageType.forName(messageType).hasNoPayload()) {
-    return
+    return null
   }
   const type = PAYLOAD_TYPES[messageType]
   if (!type) {
@@ -82,7 +82,7 @@ export default class WebSocketMessage {
 
   static validatePayload(typeName: string, payload: MessagePayload) {
 	  if (payload.constructor !== payloadTypeFor(typeName)) {
-	    throw Error(`payload not of type ${typeName} ${toJson(payload)}`)
+	    throw Error(`payload not of type ${typeName} ${JSON.stringify(payload)}`)
     }
   }
 

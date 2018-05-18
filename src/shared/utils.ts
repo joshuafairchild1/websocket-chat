@@ -7,13 +7,9 @@ export function randomId() {
   return '_' + Math.random().toString(36).substr(2, 9)
 }
 
-/**
- * @param consumer {*}
- * @param methodName {string}
- * @param receiver {*}
- * @return {Function}
- */
-export function makeHandlerHelper(consumer: any, methodName: string, receiver = this) {
+export function makeHandlerHelper(
+  consumer: any, methodName: string, receiver = this
+) {
   if (!consumer || !consumer[methodName]) {
     throw Error(`method ${methodName} not present on ${consumer}`)
   }
@@ -22,11 +18,7 @@ export function makeHandlerHelper(consumer: any, methodName: string, receiver = 
   }
 }
 
-/**
- * @param selector {string}
- * @return {Element}
- */
-export function findElement(selector: string) {
+export function findElement(selector: string): Element {
   if (!selector) {
     throw Error('selector required to find document element')
   }
@@ -37,11 +29,7 @@ export function findElement(selector: string) {
   return el
 }
 
-/**
- * @param data {*}
- * @return {*}
- */
-export function toJson(data: any) {
+export function toJson(data: any): any {
   try {
     return JSON.parse(data)
   } catch (ex) {

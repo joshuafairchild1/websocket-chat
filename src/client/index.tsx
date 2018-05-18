@@ -4,7 +4,8 @@ import App from './components/App'
 import WebSocketClient from './WebSocketClient'
 import { APP_PORT } from '../shared/utils'
 
-const client = new WebSocketClient(APP_PORT)
+const socket = new WebSocket(`ws://localhost:${APP_PORT}`)
+const client = new WebSocketClient(socket)
 
 ReactDOM.render(
   <App webSocketClient={client}/>,

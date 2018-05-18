@@ -8,7 +8,7 @@ import WebSocketMessage from '../shared/model/WebSocketMessage'
 import { ClientMessagePayload } from '../shared/Types'
 
 const STARTUP_TIMEOUT = 5 * 1000
-enum WS_READY_STATES {
+export enum WS_READY_STATES {
   // noinspection JSUnusedGlobalSymbols
   CONNECTING, OPEN, CLOSING, CLOSED }
 
@@ -26,11 +26,9 @@ function callStrategy(message: MessageEvent) {
 }
 
 export default class WebSocketClient {
-  private readonly socket: WebSocket
   private _id: string | null
 
-	constructor(port: number) {
-		const socket = this.socket = new WebSocket(`ws://localhost:${port}`)
+	constructor(private readonly socket: WebSocket) {
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
     handle('message', callStrategy)
     handle('open', this.onOpen)

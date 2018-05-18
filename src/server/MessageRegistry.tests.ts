@@ -1,14 +1,13 @@
 'use strict'
 
-const assert = require('assert')
-const MessageRegistry = require('./MessageRegistry').default
-const ChatMessage = require('../shared/model/ChatMessage.ts').default
-const TimeSource = require('../shared/TimeSource.ts').default
+import { assert } from 'chai'
+import MessageRegistry from './MessageRegistry'
+import TimeSource from '../shared/TimeSource'
+import ChatMessage from '../shared/model/ChatMessage'
 
 describe('Message Registry', function () {
 
-  /** @type {MessageRegistry} */
-  let uut
+  let uut: MessageRegistry
 
   beforeEach(function () {
     uut = new MessageRegistry()
