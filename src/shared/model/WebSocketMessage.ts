@@ -4,9 +4,9 @@ import { toJson } from '../utils'
 import ChatMessage from './ChatMessage'
 import ConnectPayload from './ConnectPayload'
 import MessageType from '../MessageType'
-import { MessagePayload } from '../Types'
 import Room from './Room'
 import RoomJoinedPayload from './RoomJoinedPayload'
+import { MessagePayload } from '../Types'
 
 const { server, client } = MessageType
 
@@ -20,28 +20,11 @@ const PAYLOAD_TYPES = {
   [server.updateMessages.name()]: Array,
   [server.roomJoined.name()]: RoomJoinedPayload,
   [client.createRoom.name()]: Room,
-  // payload: roomId
-  [client.joinRoom.name()]: String,
   // payload: subscriptionId
   [client.disconnect.name()]: String,
   [client.sendChat.name()]: ChatMessage,
   // payload: username to set
   [client.setUsername.name()]: String
-}
-
-/**
- * Return the payload type associated with a given message type, or null
- * if that message does not send a payload
- */
-function payloadTypeFor(messageType: string): Function | null  {
-  if (MessageType.forName(messageType).hasNoPayload()) {
-    return null
-  }
-  const type = PAYLOAD_TYPES[messageType]
-  if (!type) {
-    throw Error('no payload type mapped to message type: ' + messageType)
-  }
-  return type
 }
 
 export default class WebSocketMessage {
@@ -71,7 +54,7 @@ export default class WebSocketMessage {
     const {
       type, payload = null, clientId = null, roomId = null
     } = toJson(utf8String)
-    const payloadType: Function = payloadTypeFor(type)
+    const payloadType: Function = WebSocketMessage.payloadTypeFor(type)
     let typedPayload: MessagePayload
     switch (payloadType) {
       case ConnectPayload:
@@ -99,8 +82,19 @@ export default class WebSocketMessage {
       MessageType.forName(type), typedPayload, clientId, roomId)
   }
 
+  static payloadTypeFor(messageType: string): Function | null  {
+    if (MessageType.forName(messageType).hasNoPayload()) {
+      return null
+    }
+    const type = PAYLOAD_TYPES[messageType]
+    if (!type) {
+      throw Error('no payload type mapped to message type: ' + messageType)
+    }
+    return type
+  }
+
   static validatePayload(typeName: string, payload: MessagePayload) {
-	  if (payload.constructor !== payloadTypeFor(typeName)) {
+	  if (payload.constructor !== WebSocketMessage.payloadTypeFor(typeName)) {
 	    throw Error(`payload not of type ${typeName} ${JSON.stringify(payload)}`)
     }
   }

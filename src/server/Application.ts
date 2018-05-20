@@ -1,6 +1,6 @@
 'use strict'
 
-import ChatTransport from './ChatTransport'
+import MessageTransport from './MessageTransport'
 import * as fs from "fs"
 import { APP_PORT, logger } from '../shared/utils'
 import * as http from 'http'
@@ -19,7 +19,7 @@ const SERVED_FILES: StringToString = {
 
 export default class Application {
 
-  constructor(transport: ChatTransport) {
+  constructor(transport: MessageTransport) {
     const httpServer = this.initHttpServer()
     const wsServer = new WebSocketServer.server({ httpServer })
     httpServer.listen(APP_PORT,

@@ -8,12 +8,12 @@ import { connection } from 'websocket'
 import { EventEmitter } from 'events'
 import { Closeable } from '../shared/Types'
 
-const log = logger('RoomChannel')
 
 export default class RoomChannel extends EventEmitter implements Closeable {
 
   readonly [index:string]: any
   private readonly clients: Map<string, User> = new Map()
+  private log = logger(`RoomChannel-${this.roomId}`)
   isActive = true
 
   constructor(private roomId: string, private messages: MessageRegistry
@@ -36,13 +36,15 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     const { clients } = this
     const user = clients.get(clientId)
     if (!user) {
-      log('could not locate user who disconnected', clientId)
+      this.log('could not locate user who disconnected', clientId)
       return
     }
     clients.delete(clientId)
-    log('client', clientId, 'disconnected', clients.size, 'connections remaining')
+    this.log('client', clientId, 'disconnected from room', this.roomId,
+      clients.size, 'participants remaining')
     if (clients.size === 0) {
-      log('no more participants in room', this.roomId, ', shutting down channel')
+      this.log(`no more participants in room ${this.roomId}`,
+        'shutting down channel')
       this.close()
     }
     return user
@@ -65,14 +67,14 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     this.updateMessages(clientId, name)
   }
 
-  private updateMessages(clientId: string, name: string) {
-    this.messages.updateNameFor(clientId, name)
-  }
-
   close() {
-    log(`emitting "close" event on channel for room ${this.roomId}`)
+    this.log(`emitting "close" event on channel for room ${this.roomId}`)
     this.emit('close')
     this.isActive = false
+  }
+
+  private updateMessages(clientId: string, name: string) {
+    this.messages.updateNameFor(clientId, name)
   }
 
 }

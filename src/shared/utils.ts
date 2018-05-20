@@ -8,7 +8,7 @@ export function randomId() {
 }
 
 export function makeHandlerHelper(
-  consumer: any, methodName: string, receiver = this
+  consumer: any, methodName: string, receiver: any | null = null
 ) {
   if (!consumer || !consumer[methodName]) {
     throw Error(`method ${methodName} not present on ${consumer}`)
@@ -41,17 +41,11 @@ export const scrollToBottom = (el: Element) => {
   el.scrollTop = el.scrollHeight
 }
 
-export const listenForClick: (el: Element) => Promise<Event> = (element: Element) =>
-  new Promise((resolve, reject) => {
-    if (!element || !element.addEventListener) {
-      reject(Error('not an HTML element: ' + element))
-    }
-    element.addEventListener('click', resolve.bind(this))
-  })
-
 export const logger = (label: string) => {
   if (!label) {
     throw Error('label required')
   }
   return (...statements: any[]) => console.log(`[ ${label} ]`, ...statements)
 }
+
+export const scrollMessageList = () => scrollToBottom(findElement('.message-list'))

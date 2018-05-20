@@ -47,14 +47,4 @@ describe('WebSocketClient', function() {
     assert.equal(invocations[0], expected)
   })
 
-  it('sends disconnect message when the socket connection closes', function() {
-    const subscriptionId = 'someId'
-    uut.close(subscriptionId)
-    const { invocations } = socket
-    const expected = new WebSocketMessage(
-      MessageType.client.disconnect, subscriptionId).forTransport()
-    assert.equal(invocations[0], expected)
-    assert.isTrue(socket.isClosed)
-  })
-
 })

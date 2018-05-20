@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ChangeEvent, Component, FormEvent } from 'react'
+import { Button } from 'react-materialize'
 
 interface ChatFormProps {
   sendMessage: (message: string) => void
@@ -33,12 +34,14 @@ export default class ChatForm extends Component<ChatFormProps, ChatFormState> {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit.bind(this)} className="chat-form">
+      <form onSubmit={this.handleSubmit.bind(this)} className='chat-form'>
         <input
-          type="text" className="chat-input"
+          type='text' className='chat-input'
           value={this.state.inputValue}
           onChange={this.handleChange.bind(this)}/>
-        <button type="submit">Send</button>
+        <Button
+          type='submit'
+          waves='light'>Send</Button>
       </form>
     )
   }

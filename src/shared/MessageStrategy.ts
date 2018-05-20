@@ -4,7 +4,7 @@ import { logger } from './utils'
 import MessageType from './MessageType'
 
 const log = logger('MessageStrategy')
-const { server, client } = MessageType
+const { server } = MessageType
 
 const STRATEGIES = Symbol('message-strategies')
 
@@ -22,7 +22,7 @@ export class MessageStrategy {
     try {
       strategy(...args)
     } catch (ex) {
-      log('exception while invoking strategy for message', messageType, ex)
+      log('exception while invoking strategy for message', messageType.name(), ex)
     }
   }
 
@@ -62,47 +62,5 @@ export class NewRoomStrategy extends MessageStrategy {
 export class RoomJoinedStrategy extends MessageStrategy {
   constructor(handler: Function, receiver: any | null = null) {
     super(server.roomJoined, handler.bind(receiver))
-  }
-}
-
-export class ConnectStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.connect, handler.bind(receiver))
-  }
-}
-
-export class DisconnectStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.disconnect, handler.bind(receiver))
-  }
-}
-
-export class SendChatStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.sendChat, handler.bind(receiver))
-  }
-}
-
-export class SetUsernameStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.setUsername, handler.bind(receiver))
-  }
-}
-
-export class CreateRoomStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.createRoom, handler.bind(receiver))
-  }
-}
-
-export class JoinRoomStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.joinRoom, handler.bind(receiver))
-  }
-}
-
-export class LeaveRoomStrategy extends MessageStrategy {
-  constructor(handler: Function, receiver: any | null = null) {
-    super(client.leaveRoom, handler.bind(receiver))
   }
 }

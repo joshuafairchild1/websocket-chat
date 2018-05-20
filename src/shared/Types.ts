@@ -17,5 +17,5 @@ export interface StringToString {
 }
 
 export interface Closeable {
-  close: (...args: any[] | null) => void
+  close: VoidFunction
 }

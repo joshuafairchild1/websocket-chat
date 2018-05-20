@@ -61,8 +61,7 @@ export default class WebSocketClient implements Closeable {
 		this.socket.send(message)
 	}
 
-	close(subscriptionId: string) {
-		this.sendMessage(MessageType.client.disconnect, subscriptionId)
+	close() {
     this.socket.close()
   }
 

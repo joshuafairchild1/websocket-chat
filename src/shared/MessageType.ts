@@ -26,6 +26,7 @@ export default class MessageType {
   hasNoPayload(): boolean {
     return this === MessageType.client.connect
       || this === MessageType.client.leaveRoom
+      || this === MessageType.client.joinRoom
   }
 
   static forName(name: string): MessageType {

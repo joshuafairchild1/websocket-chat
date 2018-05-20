@@ -11,7 +11,7 @@ type ChatRoomProps = {
   room: Room
   changeUsername: (name: string) => void
   sendMessage: (text: string) => void
-  showAllRooms: () => void
+  showAllRooms: VoidFunction
 }
 
 export default class ChatRoom extends React.Component<ChatRoomProps> {
