@@ -8,6 +8,7 @@ import MessageType from '../shared/MessageType'
 
 class MockSocket extends EventEmitter {
   invocations: string[] = []
+  isClosed = false
   // noinspection JSUnusedGlobalSymbols - required for testing
   readyState = WS_READY_STATES.OPEN
 
@@ -20,6 +21,12 @@ class MockSocket extends EventEmitter {
   send(message: string) {
     this.invocations.push(message)
   }
+
+  // noinspection JSUnusedGlobalSymbols - required for testing
+  close() {
+    this.isClosed = true
+  }
+
 }
 
 describe('WebSocketClient', function() {
@@ -29,7 +36,7 @@ describe('WebSocketClient', function() {
 
   beforeEach(function() {
     socket = new MockSocket()
-    uut = new WebSocketClient(socket as any)
+    uut = new WebSocketClient(socket as any as WebSocket)
   })
 
   it('sends connect message when the socket connection opens', function() {
@@ -41,13 +48,13 @@ describe('WebSocketClient', function() {
   })
 
   it('sends disconnect message when the socket connection closes', function() {
-    const clientId = 'someId'
-    uut.id = clientId
-    socket.emit('close')
+    const subscriptionId = 'someId'
+    uut.close(subscriptionId)
     const { invocations } = socket
     const expected = new WebSocketMessage(
-      MessageType.client.disconnect, null, clientId).forTransport()
+      MessageType.client.disconnect, subscriptionId).forTransport()
     assert.equal(invocations[0], expected)
+    assert.isTrue(socket.isClosed)
   })
 
 })

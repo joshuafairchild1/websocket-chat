@@ -53,6 +53,18 @@ export class UpdateMessagesStrategy extends MessageStrategy {
   }
 }
 
+export class NewRoomStrategy extends MessageStrategy {
+  constructor(handler: Function, receiver: any | null = null) {
+    super(server.newRoom, handler.bind(receiver))
+  }
+}
+
+export class RoomJoinedStrategy extends MessageStrategy {
+  constructor(handler: Function, receiver: any | null = null) {
+    super(server.roomJoined, handler.bind(receiver))
+  }
+}
+
 export class ConnectStrategy extends MessageStrategy {
   constructor(handler: Function, receiver: any | null = null) {
     super(client.connect, handler.bind(receiver))
@@ -74,5 +86,23 @@ export class SendChatStrategy extends MessageStrategy {
 export class SetUsernameStrategy extends MessageStrategy {
   constructor(handler: Function, receiver: any | null = null) {
     super(client.setUsername, handler.bind(receiver))
+  }
+}
+
+export class CreateRoomStrategy extends MessageStrategy {
+  constructor(handler: Function, receiver: any | null = null) {
+    super(client.createRoom, handler.bind(receiver))
+  }
+}
+
+export class JoinRoomStrategy extends MessageStrategy {
+  constructor(handler: Function, receiver: any | null = null) {
+    super(client.joinRoom, handler.bind(receiver))
+  }
+}
+
+export class LeaveRoomStrategy extends MessageStrategy {
+  constructor(handler: Function, receiver: any | null = null) {
+    super(client.leaveRoom, handler.bind(receiver))
   }
 }

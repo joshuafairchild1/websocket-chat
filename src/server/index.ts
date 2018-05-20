@@ -2,12 +2,10 @@
 
 import ChatTransport from './ChatTransport'
 import Application from './Application'
-import ChatRoom from './ChatRoom'
-import MessageRegistry from './MessageRegistry'
+import RoomChannelRegistry from './RoomChannelRegistry'
 
 
-const messageRegistry = new MessageRegistry()
-const room = new ChatRoom(messageRegistry)
-const transport = new ChatTransport(room)
+const rooms = new RoomChannelRegistry()
+const transport = new ChatTransport(rooms)
 
 new Application(transport)

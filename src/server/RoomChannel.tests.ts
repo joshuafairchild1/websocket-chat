@@ -2,21 +2,23 @@
 
 import MessageRegistry from './MessageRegistry'
 import { connection } from 'websocket'
-import ChatRoom from './ChatRoom'
+import RoomChannel from './RoomChannel'
 import ChatMessage from '../shared/model/ChatMessage'
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 
+const ROOM_ID = 'someRoomId'
+
 import User from '../shared/model/User'
 
-describe('ChatRoom', function () {
+describe('RoomChannel', function () {
 
   let messages: MessageRegistry,
-    uut: ChatRoom
+    uut: RoomChannel
 
   beforeEach(() => {
     messages = new MessageRegistry()
-    uut = new ChatRoom(messages)
+    uut = new RoomChannel(ROOM_ID, messages)
   })
 
   it('user joins, sends a message and leaves', function () {

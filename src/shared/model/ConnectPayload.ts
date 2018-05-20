@@ -1,7 +1,7 @@
 'use strict'
 
-import ChatMessage from './ChatMessage'
+import Room from './Room'
 
 export default class ConnectPayload {
-  constructor(public clientId: string, public messages: ChatMessage[]) {}
+  constructor(public rooms: Room[], public subscriptionId: string) {}
 }

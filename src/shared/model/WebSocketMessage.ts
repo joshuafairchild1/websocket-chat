@@ -5,15 +5,27 @@ import ChatMessage from './ChatMessage'
 import ConnectPayload from './ConnectPayload'
 import MessageType from '../MessageType'
 import { MessagePayload } from '../Types'
+import Room from './Room'
+import RoomJoinedPayload from './RoomJoinedPayload'
 
 const { server, client } = MessageType
 
 const PAYLOAD_TYPES = {
   [server.newConnection.name()]: ConnectPayload,
+  [server.newRoom.name()]: Room,
   [server.newMessage.name()]: ChatMessage,
+  // payload: new username
   [server.updateUsername.name()]: String,
+  // payload: ChatMessage[]
   [server.updateMessages.name()]: Array,
+  [server.roomJoined.name()]: RoomJoinedPayload,
+  [client.createRoom.name()]: Room,
+  // payload: roomId
+  [client.joinRoom.name()]: String,
+  // payload: subscriptionId
+  [client.disconnect.name()]: String,
   [client.sendChat.name()]: ChatMessage,
+  // payload: username to set
   [client.setUsername.name()]: String
 }
 
@@ -36,15 +48,11 @@ export default class WebSocketMessage {
 
   public type: string
 
-  /**
-   * @param type {MessageType}
-   * @param payload {*|null}
-   * @param clientId {string|null} present if the message is sent from the client
-   */
 	constructor(
 	  type: MessageType,
     public payload: any = null,
-    public clientId: string = null
+    public clientId: string = null,
+    public roomId: string = null
   ) {
     MessageType.validate(type)
     const name = type.name()
@@ -60,16 +68,26 @@ export default class WebSocketMessage {
 	}
 
 	static fromString(utf8String: string): WebSocketMessage {
-    const { type, payload = null, clientId = null } = toJson(utf8String)
+    const {
+      type, payload = null, clientId = null, roomId = null
+    } = toJson(utf8String)
     const payloadType: Function = payloadTypeFor(type)
     let typedPayload: MessagePayload
     switch (payloadType) {
       case ConnectPayload:
-        typedPayload = new ConnectPayload(payload.clientId, payload.messages)
+        typedPayload = new ConnectPayload(payload.rooms, payload.subscriptionId)
         break
       case ChatMessage:
         typedPayload = new ChatMessage(
           payload.senderId, payload.senderName, payload.content)
+        break
+      case Room:
+        typedPayload = new Room(
+          payload.name, payload.messages).withId(payload.id)
+        break
+      case RoomJoinedPayload:
+        typedPayload = new RoomJoinedPayload(
+          payload.roomId, payload.clientId, payload.messages)
         break
       case String:
       case Array:
@@ -77,7 +95,8 @@ export default class WebSocketMessage {
         typedPayload = payload
         break
   }
-    return new WebSocketMessage(MessageType.forName(type), typedPayload, clientId)
+    return new WebSocketMessage(
+      MessageType.forName(type), typedPayload, clientId, roomId)
   }
 
   static validatePayload(typeName: string, payload: MessagePayload) {

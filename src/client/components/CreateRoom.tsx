@@ -1,19 +1,25 @@
-import * as React from 'react'
-import { ChangeEvent, Component, FormEvent } from 'react'
+'use strict'
 
-interface ChatFormProps {
-  sendMessage: (message: string) => void
+import { ChangeEvent, Component, FormEvent } from 'react'
+import * as React from 'react'
+
+interface CreateRoomProps {
+  createRoom: (name: string) => void
 }
 
-interface ChatFormState {
+interface CreateRoomState {
   inputValue: string
 }
 
-export default class ChatForm extends Component<ChatFormProps, ChatFormState> {
+export default class CreateRoom extends Component<CreateRoomProps, CreateRoomState> {
 
-  constructor(props: ChatFormProps) {
+  constructor(props: CreateRoomProps) {
     super(props)
     this.state = { inputValue: '' }
+  }
+
+  private set inputValue(value: string) {
+    this.setState({ inputValue: value })
   }
 
   private handleChange(event: ChangeEvent<any>) {
@@ -23,22 +29,18 @@ export default class ChatForm extends Component<ChatFormProps, ChatFormState> {
   private handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
-    this.props.sendMessage(value)
+    this.props.createRoom(value)
     this.inputValue = ''
-  }
-
-  private set inputValue(value: string) {
-    this.setState({ inputValue: value })
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit.bind(this)} className="chat-form">
+      <form onSubmit={this.handleSubmit.bind(this)}>
         <input
-          type="text" className="chat-input"
+          type="text"
           value={this.state.inputValue}
           onChange={this.handleChange.bind(this)}/>
-        <button type="submit">Send</button>
+        <button type="submit">Create</button>
       </form>
     )
   }

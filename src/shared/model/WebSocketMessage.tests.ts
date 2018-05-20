@@ -6,6 +6,7 @@ import { MessagePayload } from '../Types'
 import WebSocketMessage from './WebSocketMessage'
 import ConnectPayload from './ConnectPayload'
 import ChatMessage from './ChatMessage'
+import Room from './Room'
 
 const { server, client } = MessageType
 
@@ -14,7 +15,7 @@ describe('WebSocketMessage', function () {
   it('validates message payload', function () {
     const validate = (type: string, payload: MessagePayload) =>
       WebSocketMessage.validatePayload(type, payload)
-    validate(server.newConnection.name(), new ConnectPayload('someId', []))
+    validate(server.newConnection.name(), new ConnectPayload([], 'subscriptionId'))
     validate(server.newMessage.name(), new ChatMessage('someId', 'Name', 'Hello'))
     validate(server.updateUsername.name(), 'new username')
     validate(server.updateMessages.name(), [])
@@ -29,14 +30,15 @@ describe('WebSocketMessage', function () {
   it('constructs messages from a string', function () {
     const clientId = 'someId'
     const clientName = 'someName'
+    const room = new Room('best room')
     const chat = new ChatMessage(clientId, clientName, 'Hello')
     const sendChatMessage = new WebSocketMessage(client.sendChat, chat)
     const asString = JSON.stringify(sendChatMessage)
     const asMessage = WebSocketMessage.fromString(asString)
     assert.deepEqual(asMessage, sendChatMessage)
-    
+
     const newConnectMessage = new WebSocketMessage(
-      server.newConnection, new ConnectPayload(clientId, [ chat ]))
+      server.newConnection, new ConnectPayload([ room ], 'subscriptionId'))
     const asString2 = JSON.stringify(newConnectMessage)
     const asMessage2 = WebSocketMessage.fromString(asString2)
     assert.deepEqual(asMessage2, newConnectMessage)

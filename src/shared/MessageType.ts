@@ -17,9 +17,15 @@ export default class MessageType {
     return this[NAME]
   }
 
+  requiresClientId(): boolean {
+    return this === MessageType.client.sendChat
+      || this === MessageType.client.leaveRoom
+      || this === MessageType.client.setUsername
+  }
+
   hasNoPayload(): boolean {
     return this === MessageType.client.connect
-      || this === MessageType.client.disconnect
+      || this === MessageType.client.leaveRoom
   }
 
   static forName(name: string): MessageType {
@@ -40,6 +46,8 @@ export default class MessageType {
 
   static server = {
     newConnection: new MessageType('newConnection'),
+    newRoom: new MessageType('newRoom'),
+    roomJoined: new MessageType('roomJoined'),
     newMessage: new MessageType('newMessage'),
     updateUsername: new MessageType('updateUsername'),
     updateMessages: new MessageType('updateMessages')
@@ -48,6 +56,9 @@ export default class MessageType {
   static client = {
     connect: new MessageType('connect'),
     disconnect: new MessageType('disconnect'),
+    createRoom: new MessageType('createRoom'),
+    joinRoom: new MessageType('joinRoom'),
+    leaveRoom: new MessageType('leaveRoom'),
     sendChat: new MessageType('sendChat'),
     setUsername: new MessageType('setUsername')
   }

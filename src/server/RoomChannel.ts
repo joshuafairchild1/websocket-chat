@@ -5,14 +5,21 @@ import ChatMessage from '../shared/model/ChatMessage'
 import MessageRegistry from './MessageRegistry'
 import User from '../shared/model/User'
 import { connection } from 'websocket'
+import { EventEmitter } from 'events'
+import { Closeable } from '../shared/Types'
 
-const log = logger('ChatRoom')
+const log = logger('RoomChannel')
 
-export default class ChatRoom {
+export default class RoomChannel extends EventEmitter implements Closeable {
 
+  readonly [index:string]: any
   private readonly clients: Map<string, User> = new Map()
+  isActive = true
 
-  constructor(private messages: MessageRegistry) {}
+  constructor(private roomId: string, private messages: MessageRegistry
+  ) {
+    super()
+  }
 
   addMessage(message: ChatMessage) {
     this.messages.add(message)
@@ -26,14 +33,18 @@ export default class ChatRoom {
   }
 
   userLeft(clientId: string): User {
-    const user = this.clients.get(clientId)
+    const { clients } = this
+    const user = clients.get(clientId)
     if (!user) {
       log('could not locate user who disconnected', clientId)
       return
     }
-    this.clients.delete(clientId)
-    log('client', clientId, 'disconnected',
-      this.clients.size, 'connections remaining')
+    clients.delete(clientId)
+    log('client', clientId, 'disconnected', clients.size, 'connections remaining')
+    if (clients.size === 0) {
+      log('no more participants in room', this.roomId, ', shutting down channel')
+      this.close()
+    }
     return user
   }
 
@@ -56,6 +67,12 @@ export default class ChatRoom {
 
   private updateMessages(clientId: string, name: string) {
     this.messages.updateNameFor(clientId, name)
+  }
+
+  close() {
+    log(`emitting "close" event on channel for room ${this.roomId}`)
+    this.emit('close')
+    this.isActive = false
   }
 
 }
