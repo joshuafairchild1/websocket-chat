@@ -35,7 +35,7 @@ export default class StateManager {
         const { roomId, clientId, messages } = newState as RoomJoinedPayload
         const room = rooms.find(room => room.id === roomId)
         room.messages = messages
-        return app.setState({ selectedRoom: room, userName: clientId })
+        return app.setState({ selectedRoom: room, userName: clientId, clientId })
       }
       default: return app.setState(newState as any)
     }

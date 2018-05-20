@@ -22,22 +22,22 @@ export default class ClientMessenger {
     this.webSocketClient.sendMessage(client.createRoom, room)
   }
 
-  changeUsername(name: string, roomId: string) {
-    this.webSocketClient.sendMessage(client.setUsername, name, roomId)
+  changeUsername(name: string, clientId: string, roomId: string) {
+    this.webSocketClient.sendMessage(client.setUsername, name, clientId, roomId)
   }
 
-  sendMessage(text: string, userName: string, roomId: string) {
+  sendMessage(text: string, userName: string, clientId: string, roomId: string) {
     const { webSocketClient } = this
-    const message = new ChatMessage(webSocketClient.id, userName, text)
-    webSocketClient.sendMessage(client.sendChat, message, roomId)
+    const message = new ChatMessage(clientId, userName, text)
+    webSocketClient.sendMessage(client.sendChat, message, clientId, roomId)
   }
 
   joinRoom(roomId: string) {
-    this.webSocketClient.sendMessage(client.joinRoom, null, roomId)
+    this.webSocketClient.sendMessage(client.joinRoom, null, null, roomId)
   }
 
-  leaveRoom(roomId: string) {
-    this.webSocketClient.sendMessage(client.leaveRoom, null, roomId)
+  leaveRoom(clientId: string, roomId: string) {
+    this.webSocketClient.sendMessage(client.leaveRoom, null, clientId, roomId)
   }
 
   disconnect(subscriptionId: string, roomId: string | null = null) {

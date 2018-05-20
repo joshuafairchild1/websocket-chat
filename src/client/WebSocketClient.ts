@@ -26,7 +26,6 @@ function callStrategy(message: MessageEvent) {
 }
 
 export default class WebSocketClient implements Closeable {
-  private _id: string | null
 
 	constructor(private readonly socket: WebSocket) {
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
@@ -40,23 +39,15 @@ export default class WebSocketClient implements Closeable {
 		}, STARTUP_TIMEOUT)
 	}
 
-	set id(clientId: string) {
-	  this._id = clientId
-  }
-
-  get id() {
-	  return this._id
-  }
-
 	sendMessage(
 	  type: MessageType, payload: ClientMessagePayload = null,
-    roomId: string | null = null
+    clientId: string | null = null, roomId: string | null = null
   ) {
-	  if (!this._id && type.requiresClientId()) {
+	  if (!clientId && type.requiresClientId()) {
 	    throw Error('client ID is required to send message of type ' + type.name())
     }
 		const message = new WebSocketMessage(
-		  type, payload, this._id, roomId).forTransport()
+		  type, payload, clientId, roomId).forTransport()
 		log('sending message', message)
 		this.socket.send(message)
 	}

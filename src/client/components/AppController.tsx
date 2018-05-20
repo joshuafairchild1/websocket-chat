@@ -9,7 +9,6 @@ import {
   NewConnectionStrategy, NewMessageStrategy, UpdateUsernameStrategy,
   UpdateMessagesStrategy, NewRoomStrategy, RoomJoinedStrategy
 } from '../../shared/MessageStrategy'
-import RoomJoinedPayload from '../../shared/model/RoomJoinedPayload'
 
 type AppControllerProps = {
   setState: (state: Partial<AppState>, callback?: SetStateCallback) => void
@@ -25,7 +24,8 @@ export default class AppController extends Component<AppControllerProps> {
     const { props } = this
     window.addEventListener('beforeunload', () => {
       const room = this.props.selectedRoom
-      props.clientMessenger.disconnect(this.props.subscriptionId, room && room.id)
+      props.clientMessenger.disconnect(
+        this.props.subscriptionId, room && room.id)
     })
     // TODO remove these remaining strategies
     new NewConnectionStrategy(props.setState)
@@ -33,10 +33,7 @@ export default class AppController extends Component<AppControllerProps> {
     new UpdateUsernameStrategy(props.setState)
     new UpdateMessagesStrategy(props.setState)
     new NewRoomStrategy(props.setState)
-    new RoomJoinedStrategy((payload: RoomJoinedPayload) => {
-      props.setState(payload as any as AppState)
-      this.props.webSocketClient.id = payload.clientId
-    })
+    new RoomJoinedStrategy(props.setState)
   }
 
   private get roomId(): string | null {
@@ -46,13 +43,13 @@ export default class AppController extends Component<AppControllerProps> {
 
   private showAllRooms() {
     const { props } = this
-    props.clientMessenger.leaveRoom(this.roomId)
+    props.clientMessenger.leaveRoom(this.props.clientId, this.roomId)
     props.setState({ selectedRoom: null })
   }
 
   render() {
     const { props, roomId } = this
-    const { clientMessenger } = props
+    const { clientMessenger, clientId } = props
     return (
       <div className='app-container'>
         {props.selectedRoom
@@ -60,15 +57,16 @@ export default class AppController extends Component<AppControllerProps> {
               messages={props.selectedRoom.messages}
               userName={props.userName}
               room={props.selectedRoom}
-              changeUsername={
-                (name: string) => clientMessenger.changeUsername(name, roomId)}
+              changeUsername={(name: string) =>
+                clientMessenger.changeUsername(name, clientId, roomId)}
               sendMessage={(text: string) =>
-                clientMessenger.sendMessage(text, props.userName, roomId)}
+                clientMessenger.sendMessage(
+                  text, props.userName, clientId, roomId)}
               showAllRooms={this.showAllRooms.bind(this)}/>
           : <RoomList
-            rooms={props.rooms}
-            sendCreateRoom={clientMessenger.sendCreateRoom}
-            joinRoom={(id: string) => clientMessenger.joinRoom(id)} />
+              rooms={props.rooms}
+              sendCreateRoom={clientMessenger.sendCreateRoom}
+              joinRoom={(id: string) => clientMessenger.joinRoom(id)} />
         }
       </div>
     )

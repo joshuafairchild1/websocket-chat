@@ -19,6 +19,7 @@ export class AppState {
     public userName: string = 'Anonymous',
     public selectedRoom: Room | null = null,
     public subscriptionId: string | null = null,
+    public clientId: string | null = null
   ) { }
 }
 
