@@ -7,6 +7,7 @@ import WebSocketMessage from './WebSocketMessage'
 import ConnectPayload from './ConnectPayload'
 import ChatMessage from './ChatMessage'
 import Room from './Room'
+import TimeSource from '../TimeSource'
 
 const { server, client } = MessageType
 
@@ -28,6 +29,7 @@ describe('WebSocketMessage', function () {
   })
 
   it('constructs messages from a string', function () {
+    TimeSource.set()
     const clientId = 'someId'
     const clientName = 'someName'
     const room = new Room('best room')
@@ -44,7 +46,7 @@ describe('WebSocketMessage', function () {
     assert.deepEqual(asMessage2, newConnectMessage)
 
     const disconnectMessage = new WebSocketMessage(
-      client.disconnect, null, clientId)
+      client.disconnect, room.id, clientId)
     const asString3 = JSON.stringify(disconnectMessage)
     const asMessage3 = WebSocketMessage.fromString(asString3)
     assert.deepEqual(asMessage3, disconnectMessage)

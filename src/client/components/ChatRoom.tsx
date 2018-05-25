@@ -14,23 +14,14 @@ type ChatRoomProps = {
   showAllRooms: VoidFunction
 }
 
-export default class ChatRoom extends React.Component<ChatRoomProps> {
+const ChatRoom: React.SFC<ChatRoomProps> = props =>
+  <div className='chat-container'>
+    <button onClick={props.showAllRooms}>Back to all rooms</button>
+    <h1>{props.room.name}: what people are saying:</h1>
+    <h5>Chatting as {props.userName}</h5>
+    <ChangeUsernameForm changeUsername={props.changeUsername}/>
+    <MessageHistory messages={props.messages}/>
+    <ChatForm sendMessage={props.sendMessage}/>
+  </div>
 
-  constructor(props: ChatRoomProps) {
-    super(props)
-  }
-
-  render() {
-    const { props } = this
-    return (
-      <div className='chat-container'>
-        <button onClick={props.showAllRooms}>Back to all rooms</button>
-        <h1>{props.room.name}: what people are saying:</h1>
-        <h5>Chatting as {props.userName}</h5>
-        <ChangeUsernameForm changeUsername={props.changeUsername}/>
-        <MessageHistory messages={props.messages}/>
-        <ChatForm sendMessage={props.sendMessage}/>
-      </div>
-    )
-  }
-}
+export default ChatRoom

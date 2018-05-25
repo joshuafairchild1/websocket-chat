@@ -5,10 +5,6 @@ import * as React from 'react'
 import { AppProps, AppState, SetStateCallback } from './App'
 import ChatRoom from './ChatRoom'
 import RoomList from './RoomList'
-import {
-  NewConnectionStrategy, NewMessageStrategy, UpdateUsernameStrategy,
-  UpdateMessagesStrategy, NewRoomStrategy, RoomJoinedStrategy
-} from '../../shared/MessageStrategy'
 
 type AppControllerProps = {
   setState: (state: Partial<AppState>, callback?: SetStateCallback) => void
@@ -21,19 +17,12 @@ export default class AppController extends Component<AppControllerProps> {
   }
 
   componentDidMount() {
-    const { props } = this
+    this.props.webSocketClient.onMessage(this.props.setState)
     window.addEventListener('beforeunload', () => {
-      const room = this.props.selectedRoom
-      props.clientMessenger.disconnect(
-        this.props.subscriptionId, room && room.id)
+      const { props, roomId } = this
+      const { clientId = null, subscriptionId } = props
+      props.clientMessenger.disconnect(subscriptionId, clientId, roomId)
     })
-    // TODO remove these remaining strategies
-    new NewConnectionStrategy(props.setState)
-    new NewMessageStrategy(props.setState)
-    new UpdateUsernameStrategy(props.setState)
-    new UpdateMessagesStrategy(props.setState)
-    new NewRoomStrategy(props.setState)
-    new RoomJoinedStrategy(props.setState)
   }
 
   private get roomId(): string | null {

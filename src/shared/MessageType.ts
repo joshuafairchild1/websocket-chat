@@ -23,10 +23,16 @@ export default class MessageType {
       || this === MessageType.client.setUsername
   }
 
-  hasNoPayload(): boolean {
-    return this === MessageType.client.connect
-      || this === MessageType.client.leaveRoom
+  requiresRoomId(): boolean {
+    return this === MessageType.client.sendChat
       || this === MessageType.client.joinRoom
+      || this === MessageType.client.leaveRoom
+  }
+
+  requiresPayload(): boolean {
+    return this !== MessageType.client.connect
+      && this !== MessageType.client.joinRoom
+      && this !== MessageType.client.leaveRoom
   }
 
   static forName(name: string): MessageType {

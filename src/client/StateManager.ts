@@ -20,18 +20,18 @@ export default class StateManager {
     }
     const { selectedRoom, rooms } = this.app.state
     switch (newState.constructor.name) {
-      case 'ConnectPayload': return app.setState(newState as AppState)
-      case 'String': return app.setState({ userName: newState } as AppState)
-      case 'Room': return app.setState({ rooms: [ ...rooms, newState as Room ] })
-      case 'ChatMessage': {
-        selectedRoom.messages = selectedRoom.messages.concat(newState as ChatMessage)
+      case ConnectPayload.name: return app.setState(newState as AppState)
+      case String.name: return app.setState({ userName: newState } as AppState)
+      case Room.name: return app.setState({ rooms: [ ...rooms, newState as Room ] })
+      case ChatMessage.name: {
+        selectedRoom.messages.push(newState as ChatMessage)
         return app.setState({ ...{ selectedRoom }}, scrollMessageList)
       }
-      case 'Array': {
+      case Array.name: {
         selectedRoom.messages = newState as ChatMessage[]
         return app.setState({ ...{ selectedRoom } })
       }
-      case 'RoomJoinedPayload': {
+      case RoomJoinedPayload.name: {
         const { roomId, clientId, messages } = newState as RoomJoinedPayload
         const room = rooms.find(room => room.id === roomId)
         room.messages = messages

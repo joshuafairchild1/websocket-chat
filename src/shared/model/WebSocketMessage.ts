@@ -9,7 +9,7 @@ import RoomJoinedPayload from './RoomJoinedPayload'
 import { MessagePayload } from '../Types'
 
 const { server, client } = MessageType
-
+const NO_PAYLOAD = Symbol('no-payload')
 const PAYLOAD_TYPES = {
   [server.newConnection.name()]: ConnectPayload,
   [server.newRoom.name()]: Room,
@@ -32,15 +32,17 @@ export default class WebSocketMessage {
   public type: string
 
 	constructor(
-	  type: MessageType,
+	  messageType: MessageType,
     public payload: any = null,
     public clientId: string = null,
     public roomId: string = null
   ) {
-    MessageType.validate(type)
-    const name = type.name()
+    MessageType.validate(messageType)
+    const name = messageType.name()
     if (payload) {
       WebSocketMessage.validatePayload(name, payload)
+    } else if (messageType.requiresPayload()) {
+      throw Error(`payload is required for message type ${messageType.name()}`)
     }
 		this.type = name
     Object.freeze(this)
@@ -54,7 +56,7 @@ export default class WebSocketMessage {
     const {
       type, payload = null, clientId = null, roomId = null
     } = toJson(utf8String)
-    const payloadType: Function = WebSocketMessage.payloadTypeFor(type)
+    const payloadType = WebSocketMessage.payloadTypeFor(type)
     let typedPayload: MessagePayload
     switch (payloadType) {
       case ConnectPayload:
@@ -72,19 +74,21 @@ export default class WebSocketMessage {
         typedPayload = new RoomJoinedPayload(
           payload.roomId, payload.clientId, payload.messages)
         break
-      case String:
       case Array:
-      case null:
-        typedPayload = payload
+        typedPayload = payload.map((message: ChatMessage) =>
+          new ChatMessage(message.senderId, message.senderName, message.content))
         break
-  }
+      case String:
+      case NO_PAYLOAD:
+        typedPayload = payload
+    }
     return new WebSocketMessage(
       MessageType.forName(type), typedPayload, clientId, roomId)
   }
 
-  static payloadTypeFor(messageType: string): Function | null  {
-    if (MessageType.forName(messageType).hasNoPayload()) {
-      return null
+  static payloadTypeFor(messageType: string): Function | Symbol  {
+    if (!MessageType.forName(messageType).requiresPayload()) {
+      return NO_PAYLOAD
     }
     const type = PAYLOAD_TYPES[messageType]
     if (!type) {
@@ -94,7 +98,8 @@ export default class WebSocketMessage {
   }
 
   static validatePayload(typeName: string, payload: MessagePayload) {
-	  if (payload.constructor !== WebSocketMessage.payloadTypeFor(typeName)) {
+    const payloadType = WebSocketMessage.payloadTypeFor(typeName)
+	  if (payloadType !== NO_PAYLOAD && payload.constructor !== payloadType) {
 	    throw Error(`payload not of type ${typeName} ${JSON.stringify(payload)}`)
     }
   }

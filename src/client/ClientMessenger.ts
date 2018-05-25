@@ -40,10 +40,12 @@ export default class ClientMessenger {
     this.webSocketClient.sendMessage(client.leaveRoom, null, clientId, roomId)
   }
 
-  disconnect(subscriptionId: string, roomId: string | null = null) {
+  disconnect(
+    subscriptionId: string, clientId: string | null = null, roomId: string | null = null
+  ) {
     const { webSocketClient } = this
     if (roomId) {
-      webSocketClient.sendMessage(client.leaveRoom, null, roomId)
+      this.leaveRoom(clientId, roomId)
     }
     webSocketClient.sendMessage(client.disconnect, subscriptionId)
     webSocketClient.close()

@@ -2,10 +2,9 @@
 
 import { APP_PORT, logger, makeHandlerHelper }
   from '../shared/utils'
-import { MessageStrategy } from '../shared/MessageStrategy'
 import MessageType from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
-import { ClientMessagePayload, Closeable } from '../shared/Types'
+import { ClientMessagePayload, Closeable, MessagePayload } from '../shared/Types'
 
 const STARTUP_TIMEOUT = 5 * 1000
 export enum WS_READY_STATES {
@@ -14,22 +13,13 @@ export enum WS_READY_STATES {
 
 const log = logger('WebSocketClient')
 
-function callStrategy(message: MessageEvent) {
-  const { data, origin } = message
-  if (origin !== 'ws://localhost:' + APP_PORT) {
-    log('message received from non-local origin', message)
-    return
-  }
-  const { type, payload } = WebSocketMessage.fromString(data)
-  log(`received message "${type}"`)
-  MessageStrategy.callFor(MessageType.forName(type), payload)
-}
-
 export default class WebSocketClient implements Closeable {
+
+  private onMessageHandler: Function | null = null
 
 	constructor(private readonly socket: WebSocket) {
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
-    handle('message', callStrategy)
+    handle('message', this.handleMessage)
     handle('open', this.onOpen)
     handle('error', (ex: ErrorEvent) => console.error('web socket exception:', ex))
 		setTimeout(() => {
@@ -46,14 +36,37 @@ export default class WebSocketClient implements Closeable {
 	  if (!clientId && type.requiresClientId()) {
 	    throw Error('client ID is required to send message of type ' + type.name())
     }
+    if (!roomId && type.requiresRoomId()) {
+      throw Error('room ID is required to send message of type ' + type.name())
+    }
 		const message = new WebSocketMessage(
 		  type, payload, clientId, roomId).forTransport()
 		log('sending message', message)
 		this.socket.send(message)
 	}
 
+	onMessage(handlePayload: (payload: MessagePayload) => void) {
+	  this.onMessageHandler = (message: MessageEvent) => {
+      const { data, origin } = message
+      if (origin !== 'ws://localhost:' + APP_PORT) {
+        log('message received from non-local origin', message)
+        return
+      }
+      const { type, payload } = WebSocketMessage.fromString(data)
+      log(`received message "${type}"`)
+      handlePayload(payload)
+    }
+  }
+
 	close() {
     this.socket.close()
+  }
+
+  private handleMessage(message: MessageEvent) {
+	  if (!this.onMessageHandler) {
+	    throw Error('cannot handle incoming message, "onMessage" was never called')
+    }
+    this.onMessageHandler(message)
   }
 
 	private onOpen() {
