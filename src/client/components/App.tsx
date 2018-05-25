@@ -11,8 +11,6 @@ export type AppProps = {
   readonly clientMessenger: ClientMessenger
 }
 
-export type SetStateCallback = (...args: any[]) => void
-
 export class AppState {
   constructor(
     public rooms: Room[] = [],

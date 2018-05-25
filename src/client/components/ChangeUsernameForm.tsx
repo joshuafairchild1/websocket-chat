@@ -1,28 +1,21 @@
 import * as React from 'react'
-import { ChangeEvent, FormEvent } from 'react'
+import { FormEvent } from 'react'
+import ControlledForm from './ControlledForm'
 
 interface Props {
   changeUsername: (name: string) => void
 }
 
-interface State {
-  inputValue: string
-  isEditing: boolean
-}
+export default class ChangeUsernameForm
+  extends ControlledForm<Props, { inputValue: string, isEditing: boolean }>
+{
 
-export default class ChangeUsernameForm extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = { inputValue: '', isEditing: false }
-    this.handleSubmit = this.handleSubmit.bind(this)
-    this.handleChange = this.handleChange.bind(this)
   }
 
-  private set inputValue(value: string) {
-    this.setState({ inputValue: value })
-  }
-
-  private handleSubmit(event: FormEvent<any>) {
+  protected handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
     if (value) {
@@ -30,10 +23,6 @@ export default class ChangeUsernameForm extends React.Component<Props, State> {
       this.setIsEditing(false)
       this.inputValue = ''
     }
-  }
-
-  private handleChange(event: ChangeEvent<any>) {
-    this.inputValue = event.target.value
   }
 
   private setIsEditing(value: boolean) {

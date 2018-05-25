@@ -1,35 +1,24 @@
 'use strict'
 
-import { ChangeEvent, Component, FormEvent } from 'react'
+import { FormEvent } from 'react'
 import * as React from 'react'
 import { Input } from 'react-materialize'
 import { Button } from 'react-materialize'
+import ControlledForm from './ControlledForm'
 
 interface CreateRoomProps {
   createRoom: (name: string) => void
   cancelCreateRoom: VoidFunction
 }
 
-interface CreateRoomState {
-  inputValue: string
-}
-
-export default class CreateRoom extends Component<CreateRoomProps, CreateRoomState> {
+export default class CreateRoom extends ControlledForm<CreateRoomProps> {
 
   constructor(props: CreateRoomProps) {
     super(props)
     this.state = { inputValue: '' }
   }
 
-  private set inputValue(value: string) {
-    this.setState({ inputValue: value })
-  }
-
-  private handleChange(event: ChangeEvent<any>) {
-    this.inputValue = event.target.value
-  }
-
-  private handleSubmit(event: FormEvent<any>) {
+  protected handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
     if (value) {
@@ -43,11 +32,11 @@ export default class CreateRoom extends Component<CreateRoomProps, CreateRoomSta
       <div className='create-room-container'>
         <div>
           <h4>Create new room</h4>
-          <form onSubmit={this.handleSubmit.bind(this)}>
+          <form onSubmit={this.handleSubmit}>
             <Input
               type='text'
               value={this.state.inputValue}  label='Room Name'
-              onChange={this.handleChange.bind(this)} />
+              onChange={this.handleChange} />
             <Button type='submit'>Create</Button>
             <Button onClick={this.props.cancelCreateRoom}>Cancel</Button>
           </form>

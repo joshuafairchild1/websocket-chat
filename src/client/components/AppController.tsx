@@ -2,12 +2,12 @@
 
 import { Component } from 'react'
 import * as React from 'react'
-import { AppProps, AppState, SetStateCallback } from './App'
+import { AppProps, AppState } from './App'
 import ChatRoom from './ChatRoom'
 import RoomList from './RoomList'
 
 type AppControllerProps = {
-  setState: (state: Partial<AppState>, callback?: SetStateCallback) => void
+  setState: (state: Partial<AppState>, callback?: VoidFunction) => void
 } & AppProps & Readonly<AppState>
 
 export default class AppController extends Component<AppControllerProps> {
