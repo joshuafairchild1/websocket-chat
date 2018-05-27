@@ -1,5 +1,3 @@
-import { FormEvent } from 'react'
-
 'use strict'
 
 export const APP_PORT = 4200
@@ -52,8 +50,9 @@ export const logger = (label: string) => {
 
 export const scrollMessageList = () => scrollToBottom(findElement('.message-list'))
 
-export function preventDefault(event: FormEvent<any>) {
-  event && event.preventDefault()
-}
-
 export const noOp = () => {}
+
+export function closeModal() {
+  const modal = $('.modal') as any
+  modal && modal.modal()
+}

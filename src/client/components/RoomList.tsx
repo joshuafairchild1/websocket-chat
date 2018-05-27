@@ -1,10 +1,8 @@
 import * as React from 'react'
 import Room from '../../shared/model/Room'
-import { Component } from 'react'
-import CreateRoom from './CreateRoom'
-import { Collection } from 'react-materialize'
-import { CollectionItem } from 'react-materialize'
-import { Button } from 'react-materialize'
+import { Component, ReactNode } from 'react'
+import { Button, Modal } from 'react-materialize'
+import ModalForm from './ModalForm'
 
 export interface RoomListProps {
   rooms: Room[]
@@ -33,33 +31,37 @@ export default class RoomList extends Component<RoomListProps, RoomListState> {
   }
 
   render() {
-    const { props, state } = this
-    if (state.isCreatingRoom) {
-      return <CreateRoom
-        createRoom={this.createRoom.bind(this)}
-        cancelCreateRoom={() => this.isCreatingRoom = false}/>
-    }
-    if (!props.rooms.length) {
+    const { props } = this
+    const { rooms } = props
+    const createModal = (trigger: ReactNode) =>
+      <ModalForm header='Create a chat room'
+                 trigger={trigger}
+                 onSubmit={this.createRoom.bind(this)}
+                 submitButtonText='Create'
+                 cancel={true} />
+    if (!rooms.length) {
       return (
         <div>
           <h4>There are currently no rooms</h4>
-          <Button onClick={() => this.isCreatingRoom = true}>
-            Create a room
-          </Button>
+          {createModal(
+            <h4>
+              Join one of these rooms, or <span>create another</span>
+            </h4>
+          )}
         </div>
       )
     }
     return (
       <div className='room-list-container'>
         <div className='room-list-head'>
-          <h4>Join one of these rooms, or
-            <span onClick={() => this.isCreatingRoom = true}>
-              create another
-            </span>
-          </h4>
+          {createModal(
+            <h4>
+              Join one of these rooms, or <span>create another</span>
+            </h4>
+          )}
         </div>
         <div className='room-links-container'>
-            {props.rooms.map((room: Room) =>
+            {rooms.map((room: Room) =>
               <h5 className='blue-btn waves waves-light room-link'
                 key={room.id}
                 onClick={() => props.joinRoom(room.id)}>

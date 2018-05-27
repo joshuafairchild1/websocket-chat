@@ -32,6 +32,7 @@ body {
 
 .room-list-head span {
   margin-left: 0.25em;
+  text-decoration: underline;
 }
 
 .room-list-head span:hover {
@@ -44,37 +45,6 @@ body {
   font-size: 1.7em;
   margin: 1em;
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-}
-
-.create-room-container {
-  background-color: #fff;
-  height: 80%;
-  border-radius: 2px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.create-room-container h4 {
-  text-align: left;
-  margin-left: 2em;
-  margin-top: 1em;
-}
-
-.create-room-container div {
-  height: 80%;
-  width: 100%;
-}
-
-.create-room-container form {
-  width: 60%;
-  height: 60%;
-  margin: 0 auto;
-}
-
-.create-room-container button {
-  margin: 1em
 }
 
 .chat-container {

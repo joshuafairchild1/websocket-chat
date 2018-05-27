@@ -1,10 +1,12 @@
-import ChangeUsername from './ChangeUsername'
+'use strict'
+
 import MessageHistory from './MessageHistory'
 import ChatForm from './ChatForm'
 import ChatMessage from '../../shared/model/ChatMessage'
 import * as React from 'react'
 import Room from '../../shared/model/Room'
 import { Button } from 'react-materialize'
+import ModalForm from './ModalForm'
 
 type ChatRoomProps = {
   userName: string
@@ -24,7 +26,11 @@ const ChatRoom: React.SFC<ChatRoomProps> = props =>
     <div className='message-container'>
       <div className='identity'>
         <h5>Chatting as {props.userName}</h5>
-        <ChangeUsername changeUsername={props.changeUsername}/>
+        <ModalForm header='New Username'
+                   trigger={<Button className='blue-btn'>Change</Button>}
+                   onSubmit={props.changeUsername}
+                   submitButtonText='OK'
+                   cancel={true} />
       </div>
       <MessageHistory messages={props.messages}/>
       <ChatForm sendMessage={props.sendMessage}/>
