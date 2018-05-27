@@ -70,9 +70,12 @@ export default class MessageHandler {
     const { clientId, payload: name, roomId } = message
     const { transport } = this
     const channel = transport.channelFor(roomId)
+    const oldName = channel.getUser(clientId).name
     channel.newUsername(clientId, name)
     connection.sendUTF(
       new WebSocketMessage(server.updateUsername, name).forTransport())
+    this.handleChatMessage(new ChatMessage(
+      clientId, 'System', `User ${oldName} changed their name to ${name}`), roomId)
     transport.sendToAllInRoom(
       roomId, server.updateMessages, channel.getMessages())
   }

@@ -16,8 +16,7 @@ export default class RoomChannel extends EventEmitter implements Closeable {
   private log = logger(`RoomChannel-${this.roomId}`)
   isActive = true
 
-  constructor(private roomId: string, private messages: MessageRegistry
-  ) {
+  constructor(private roomId: string, private messages: MessageRegistry) {
     super()
   }
 
@@ -34,11 +33,7 @@ export default class RoomChannel extends EventEmitter implements Closeable {
 
   userLeft(clientId: string): User {
     const { clients } = this
-    const user = clients.get(clientId)
-    if (!user) {
-      this.log('could not locate user who disconnected', clientId)
-      return
-    }
+    const user = this.getUser(clientId)
     clients.delete(clientId)
     this.log('client', clientId, 'disconnected from room', this.roomId,
       clients.size, 'participants remaining')
@@ -58,11 +53,16 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     return this.messages.getAll()
   }
 
-  newUsername(clientId: string, name: string) {
+  getUser(clientId: string) {
     const user = this.clients.get(clientId)
     if (!user) {
       throw Error('could not locate user ' + clientId)
     }
+    return user
+  }
+
+  newUsername(clientId: string, name: string) {
+    const user = this.getUser(clientId)
     user.name = name
     this.updateMessages(clientId, name)
   }

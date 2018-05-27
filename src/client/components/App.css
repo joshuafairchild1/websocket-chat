@@ -1,6 +1,8 @@
 html, body, #root {
   height: 100%;
   width: 100%;
+  margin:0;
+  padding:0;
 }
 
 body {
@@ -9,22 +11,23 @@ body {
 
 .app-container {
   text-align: center;
-  position: relative;
   height: 100%;
   background-color: #E91E63
 }
 
 .room-list-container {
-  overflow: auto;
-  margin: auto;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
   width: 50%;
   height: 60%;
+  position: absolute;
+  margin: auto;
+  top: 0; left: 0; bottom: 0; right: 0;
 }
 
 .room-links-container {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+  overflow: auto;
 }
 
 .room-list-head span {
@@ -32,21 +35,15 @@ body {
 }
 
 .room-list-head span:hover {
-  color: #F8BBD0;
+  color: #FFFFFF;
   cursor: pointer;
 }
 
 .room-link {
   cursor: pointer;
   font-size: 1.7em;
-  margin: 0 auto;
-}
-
-.room-link:hover {
-  background-color: #00BCD4;
-  box-shadow: 5px 5px;
-  color: #fff;
-  font-weight: bolder;
+  margin: 1em;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
 .create-room-container {
@@ -82,16 +79,81 @@ body {
 
 .chat-container {
   height: 100%;
-  position: relative
+}
+
+.chat-form {
+  margin-top: auto;
+  height: 15%;
+}
+
+.message-container {
+  background-color: #FFFFFF;
+  height: 60%;
+  width: 60vw;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  max-height: 80%;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
 .message-list {
   text-align: left;
-  background-color: #ADD8E6;
-  opacity: 0.85;
-  height: 80%;
-  width: 60%;
-  bottom: 0;
-  margin: 0 auto;
+  flex: 0 1 auto;
   overflow-y: auto;
+  height: 75%;
+  margin-bottom: 1em;
+}
+
+.back-arrow:hover {
+  cursor: pointer;
+}
+
+.identity {
+  flex: 0 0 auto;
+  flex-direction: row;
+  padding: 1em;
+  height: 10%;
+  justify-content: space-around;
+}
+
+.identity {
+  display: inherit;
+}
+
+.identity button {
+}
+
+.chat-input {
+  width: 50% !important;
+  margin-right: 0.5em !important;
+}
+
+.change-username-form input {
+  width: 60% !important;
+  margin: 0 auto;
+}
+
+.change-username-form {
+  display: flex;
+  justify-content: space-between;
+}
+
+.blue-btn {
+  background-color: #00BCD4 !important;
+  color: #FFFFFF;
+  margin: 0.3em;
+  border-radius: .1em;
+}
+
+.blue-btn-flat {
+  color: black;
+  margin: 0.25em !important;
+  background-color: Transparent;
+}
+
+.blue-btn-flat:hover {
+  border: none;
+  background-color: #00BCD4 !important;
 }

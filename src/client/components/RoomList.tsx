@@ -34,44 +34,38 @@ export default class RoomList extends Component<RoomListProps, RoomListState> {
 
   render() {
     const { props, state } = this
+    if (state.isCreatingRoom) {
+      return <CreateRoom
+        createRoom={this.createRoom.bind(this)}
+        cancelCreateRoom={() => this.isCreatingRoom = false}/>
+    }
+    if (!props.rooms.length) {
+      return (
+        <div>
+          <h4>There are currently no rooms</h4>
+          <Button onClick={() => this.isCreatingRoom = true}>
+            Create a room
+          </Button>
+        </div>
+      )
+    }
     return (
       <div className='room-list-container'>
-        {state.isCreatingRoom
-          ? <CreateRoom
-              createRoom={this.createRoom.bind(this)}
-              cancelCreateRoom={() => this.isCreatingRoom = false}/>
-          : props.rooms.length
-            ? <div>
-                <div className='room-list-head'>
-                  <h4>Join one of these rooms, or
-                    <span className='create-room-btn'
-                          onClick={() => this.isCreatingRoom = true}>
-                      create another
-                    </span>
-                  </h4>
-                </div>
-                <div className='room-links-container'>
-                  <Collection>
-                    {
-                      props.rooms.map((room: Room) =>
-                        <CollectionItem
-                          className='room-link'
-                          key={room.id}
-                          onClick={() => props.joinRoom(room.id)}>
-                          {room.name}
-                        </CollectionItem>
-                      )
-                    }
-                  </Collection>
-                </div>
-              </div>
-            : <div>
-                <h4>There are currently no rooms</h4>
-                <Button onClick={() => this.isCreatingRoom = true}>
-                  Create a room
-                </Button>
-              </div>
-        }
+        <div className='room-list-head'>
+          <h4>Join one of these rooms, or
+            <span onClick={() => this.isCreatingRoom = true}>
+              create another
+            </span>
+          </h4>
+        </div>
+        <div className='room-links-container'>
+            {props.rooms.map((room: Room) =>
+              <h5 className='blue-btn waves waves-light room-link'
+                key={room.id}
+                onClick={() => props.joinRoom(room.id)}>
+                {room.name}
+              </h5>)}
+        </div>
       </div>
     )
   }

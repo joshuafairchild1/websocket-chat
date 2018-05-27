@@ -14,7 +14,7 @@ export default class ChatForm extends ControlledForm<ChatFormProps> {
     this.state = { inputValue: '' }
   }
 
-  protected handleSubmit(event: FormEvent<any>) {
+  handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
     this.props.sendMessage(value)
@@ -24,11 +24,10 @@ export default class ChatForm extends ControlledForm<ChatFormProps> {
   render() {
     return (
       <form onSubmit={this.handleSubmit} className='chat-form'>
-        <input
-          type='text' className='chat-input'
-          value={this.state.inputValue}
-          onChange={this.handleChange}/>
-        <Button type='submit' waves='light'>
+        <input type='text' className='chat-input'
+               value={this.state.inputValue}
+               onChange={this.handleChange}/>
+        <Button type='submit' className='blue-btn'>
           Send
         </Button>
       </form>

@@ -18,7 +18,7 @@ export default class CreateRoom extends ControlledForm<CreateRoomProps> {
     this.state = { inputValue: '' }
   }
 
-  protected handleSubmit(event: FormEvent<any>) {
+  handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
     if (value) {
