@@ -10,6 +10,7 @@ import MessageHandler from './MessageHandler'
 import { Subscription } from './Subscription'
 import { MessagePayload } from '../../shared/Types'
 import RoomStore from '../store/RoomStore'
+import RoomChannel from '../room/RoomChannel'
 
 const log = logger('MessageTransport')
 
@@ -53,7 +54,7 @@ export default class MessageTransport {
       subscriber.connection.sendUTF(message))
   }
 
-  channelFor(id: string) {
+  channelFor(id: string): RoomChannel {
     return this.channels.get(id)
   }
 

@@ -12,6 +12,6 @@ import RoomStore from '../store/RoomStore'
     const transport = new MessageTransport(channels, rooms)
     new Application(transport)
   } catch (ex) {
-    throw Error('STARTUP ERROR: ' + JSON.stringify(ex))
+    console.log('STARTUP ERROR:', ex)
   }
 })()

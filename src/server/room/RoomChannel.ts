@@ -1,8 +1,6 @@
 'use strict'
 
 import { logger } from '../../shared/utils'
-import ChatMessage from '../../shared/model/ChatMessage'
-import MessageRegistry from '../messaging/MessageRegistry'
 import User from '../../shared/model/User'
 import { connection } from 'websocket'
 import { EventEmitter } from 'events'
@@ -16,12 +14,8 @@ export default class RoomChannel extends EventEmitter implements Closeable {
   private log = logger(`RoomChannel-${this.roomId}`)
   isActive = true
 
-  constructor(private roomId: string, private messages: MessageRegistry) {
+  constructor(private roomId: string,) {
     super()
-  }
-
-  addMessage(message: ChatMessage) {
-    this.messages.add(message)
   }
 
   newUser(connection: connection): User {
@@ -49,10 +43,6 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     this.clients.forEach(fn)
   }
 
-  getMessages(): ChatMessage[] {
-    return this.messages.getAll()
-  }
-
   getUser(clientId: string) {
     const user = this.clients.get(clientId)
     if (!user) {
@@ -61,20 +51,10 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     return user
   }
 
-  newUsername(clientId: string, name: string) {
-    const user = this.getUser(clientId)
-    user.name = name
-    this.updateMessages(clientId, name)
-  }
-
   close() {
     this.log(`emitting "close" event on channel for room ${this.roomId}`)
     this.emit('close')
     this.isActive = false
-  }
-
-  private updateMessages(clientId: string, name: string) {
-    this.messages.updateNameFor(clientId, name)
   }
 
 }

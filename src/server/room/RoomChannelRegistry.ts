@@ -2,7 +2,6 @@
 
 import { logger} from '../../shared/utils'
 import RoomChannel from './RoomChannel'
-import MessageRegistry from '../messaging/MessageRegistry'
 
 const log = logger('RoomChannelRegistry')
 
@@ -29,7 +28,7 @@ export default class RoomChannelRegistry {
   }
 
   private create(roomId: string): RoomChannel {
-    const channel = new RoomChannel(roomId, new MessageRegistry())
+    const channel = new RoomChannel(roomId)
     channel.on('close', () => {
       log('closing room channel for room', roomId)
       this.channels.delete(roomId)
