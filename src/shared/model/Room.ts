@@ -1,10 +1,9 @@
 'use strict'
 
 import ChatMessage from './ChatMessage'
-import { randomId } from '../utils'
 
 export default class Room {
-  id = randomId()
+  _id: string | null = null
 
   constructor(public name: string, public messages: ChatMessage[] = []) {
     if (!name) {
@@ -14,7 +13,7 @@ export default class Room {
 
   // for reconstructing an existing room when an instance is necessary
   withId(id: string): Room {
-    this.id = id
+    this._id = id
     return this
   }
 }

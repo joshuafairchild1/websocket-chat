@@ -1,6 +1,6 @@
 'use strict'
 
-import { randomId } from '../shared/utils'
+import { randomId } from '../../shared/utils'
 import { connection } from 'websocket'
 
 export class Subscription {

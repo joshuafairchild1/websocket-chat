@@ -1,15 +1,15 @@
 'use strict'
 
-import MessageRegistry from './MessageRegistry'
+import MessageRegistry from '../messaging/MessageRegistry'
 import { connection } from 'websocket'
 import RoomChannel from './RoomChannel'
-import ChatMessage from '../shared/model/ChatMessage'
+import ChatMessage from '../../shared/model/ChatMessage'
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 
 const ROOM_ID = 'someRoomId'
 
-import User from '../shared/model/User'
+import User from '../../shared/model/User'
 
 describe('RoomChannel', function () {
 

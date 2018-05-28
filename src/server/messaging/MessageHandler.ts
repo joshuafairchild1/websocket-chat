@@ -1,15 +1,16 @@
 'use strict'
 
-import MessageType from '../shared/MessageType'
-import ConnectPayload from '../shared/model/ConnectPayload'
-import WebSocketMessage from '../shared/model/WebSocketMessage'
-import RoomJoinedPayload from '../shared/model/RoomJoinedPayload'
-import ChatMessage from '../shared/model/ChatMessage'
-import Room from '../shared/model/Room'
-import { logger } from '../shared/utils'
+import MessageType from '../../shared/MessageType'
+import ConnectPayload from '../../shared/model/ConnectPayload'
+import WebSocketMessage from '../../shared/model/WebSocketMessage'
+import RoomJoinedPayload from '../../shared/model/RoomJoinedPayload'
+import ChatMessage from '../../shared/model/ChatMessage'
+import Room from '../../shared/model/Room'
+import { logger } from '../../shared/utils'
 import { connection } from 'websocket'
 import MessageTransport from './MessageTransport'
 import { Subscription } from './Subscription'
+import RoomStore from '../store/RoomStore'
 
 const log = logger('MessageHandler')
 
@@ -17,9 +18,10 @@ const { client, server } = MessageType
 
 export default class MessageHandler {
 
-  private allRooms = new Map<string, Room>()
-
-  constructor(private transport: MessageTransport) {
+  constructor(
+    private transport: MessageTransport,
+    private roomStore: RoomStore
+  ) {
     this.handle = this.handle.bind(this)
   }
 
@@ -42,12 +44,12 @@ export default class MessageHandler {
     }
   }
 
-  private handleConnect(connection: connection) {
+  private async handleConnect(connection: connection) {
     const { subscribers } = this.transport
     const sub = new Subscription(connection)
     subscribers.set(sub.id, sub)
     log(`new subscriber ${sub.id},`, subscribers.size, 'total subscriptions')
-    const payload = new ConnectPayload([...this.allRooms.values()], sub.id)
+    const payload = new ConnectPayload([...await this.roomStore.getAll()], sub.id)
     connection.sendUTF(new WebSocketMessage(
       MessageType.server.newConnection, payload).forTransport())
   }
@@ -80,17 +82,21 @@ export default class MessageHandler {
       roomId, server.updateMessages, channel.getMessages())
   }
 
-  private handleNewRoom(room: Room) {
-    if (this.allRooms.has(room.id)) {
-      throw Error('duplicate room : ' + room.id)
+  private async handleNewRoom(room: Room) {
+    const { name } = room
+    if (await this.roomStore.hasName(name)) {
+      throw Error(`duplicate room detected: ${name}`)
     }
-    log('created new room', room.id)
-    this.allRooms.set(room.id, room)
-    this.transport.sendToAllSubscribers(server.newRoom, room)
+    try {
+      const created = await this.roomStore.create(room)
+      this.transport.sendToAllSubscribers(server.newRoom, created)
+    } catch (ex) {
+      throw Error('exception creating new room: ' + JSON.stringify(ex))
+    }
   }
 
-  private handleJoinRoom(connection: connection, roomId: string) {
-    if (!this.allRooms.has(roomId)) {
+  private async handleJoinRoom(connection: connection, roomId: string) {
+    if (!(await this.roomStore.hasId(roomId))) {
       throw Error('no room found for id ' + roomId)
     }
     const channel = this.transport.channels.ensureChannelFor(roomId)
@@ -100,8 +106,8 @@ export default class MessageHandler {
       MessageType.server.roomJoined, payload).forTransport())
   }
 
-  private handleLeaveRoom(clientId: string, roomId: string) {
-    if (!this.allRooms.has(roomId)) {
+  private async handleLeaveRoom(clientId: string, roomId: string) {
+    if (!(await this.roomStore.hasId(roomId))) {
       throw Error('no room found for id ' + roomId)
     }
     const channel = this.transport.channelFor(roomId)

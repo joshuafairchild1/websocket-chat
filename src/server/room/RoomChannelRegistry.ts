@@ -1,8 +1,8 @@
 'use strict'
 
-import { logger} from '../shared/utils'
+import { logger} from '../../shared/utils'
 import RoomChannel from './RoomChannel'
-import MessageRegistry from './MessageRegistry'
+import MessageRegistry from '../messaging/MessageRegistry'
 
 const log = logger('RoomChannelRegistry')
 

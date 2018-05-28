@@ -32,6 +32,7 @@ describe('WebSocketMessage', function () {
     TimeSource.set()
     const clientId = 'someId'
     const clientName = 'someName'
+    const subscriptionId = 'someSubscriptionId'
     const room = new Room('best room')
     const chat = new ChatMessage(clientId, clientName, 'Hello')
     const sendChatMessage = new WebSocketMessage(client.sendChat, chat)
@@ -40,13 +41,13 @@ describe('WebSocketMessage', function () {
     assert.deepEqual(asMessage, sendChatMessage)
 
     const newConnectMessage = new WebSocketMessage(
-      server.newConnection, new ConnectPayload([ room ], 'subscriptionId'))
+      server.newConnection, new ConnectPayload([ room ], subscriptionId))
     const asString2 = JSON.stringify(newConnectMessage)
     const asMessage2 = WebSocketMessage.fromString(asString2)
     assert.deepEqual(asMessage2, newConnectMessage)
 
     const disconnectMessage = new WebSocketMessage(
-      client.disconnect, room.id, clientId)
+      client.disconnect, subscriptionId, room._id, clientId)
     const asString3 = JSON.stringify(disconnectMessage)
     const asMessage3 = WebSocketMessage.fromString(asString3)
     assert.deepEqual(asMessage3, disconnectMessage)

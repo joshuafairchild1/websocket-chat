@@ -10,24 +10,15 @@ export interface RoomListProps {
   joinRoom: (id: string) => void
 }
 
-interface RoomListState {
-  isCreatingRoom: boolean
-}
-
-export default class RoomList extends Component<RoomListProps, RoomListState> {
+export default class RoomList extends Component<RoomListProps> {
 
   constructor(props: RoomListProps) {
     super(props)
     this.state = { isCreatingRoom: false }
   }
 
-  private set isCreatingRoom(value: boolean) {
-    this.setState({ isCreatingRoom: value })
-  }
-
   createRoom(name: string) {
     this.props.sendCreateRoom(new Room(name))
-    this.isCreatingRoom = false
   }
 
   render() {
@@ -63,8 +54,8 @@ export default class RoomList extends Component<RoomListProps, RoomListState> {
         <div className='room-links-container'>
             {rooms.map((room: Room) =>
               <h5 className='blue-btn waves waves-light room-link'
-                key={room.id}
-                onClick={() => props.joinRoom(room.id)}>
+                key={room._id}
+                onClick={() => props.joinRoom(room._id)}>
                 {room.name}
               </h5>)}
         </div>

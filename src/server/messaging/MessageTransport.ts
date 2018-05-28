@@ -1,23 +1,27 @@
 'use strict'
 
-import { logger } from '../shared/utils'
-import MessageType from '../shared/MessageType'
-import WebSocketMessage from '../shared/model/WebSocketMessage'
-import User from '../shared/model/User'
+import { logger } from '../../shared/utils'
+import MessageType from '../../shared/MessageType'
+import WebSocketMessage from '../../shared/model/WebSocketMessage'
+import User from '../../shared/model/User'
 import { connection, IMessage } from 'websocket'
-import RoomChannelRegistry from './RoomChannelRegistry'
+import RoomChannelRegistry from '../room/RoomChannelRegistry'
 import MessageHandler from './MessageHandler'
 import { Subscription } from './Subscription'
-import { MessagePayload } from '../shared/Types'
+import { MessagePayload } from '../../shared/Types'
+import RoomStore from '../store/RoomStore'
 
 const log = logger('MessageTransport')
 
 export default class MessageTransport {
 
-  private handler = new MessageHandler(this)
+  private handler = new MessageHandler(this, this.roomStore)
   public subscribers = new Map<string, Subscription>()
 
-  constructor(public channels: RoomChannelRegistry) { }
+  constructor(
+    public channels: RoomChannelRegistry,
+    private roomStore: RoomStore
+  ) { }
 
   registerConnection(connection: connection) {
     connection.on('message', (message: IMessage) => {

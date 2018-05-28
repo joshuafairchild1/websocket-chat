@@ -1,11 +1,11 @@
 'use strict'
 
-import MessageTransport from './MessageTransport'
+import MessageTransport from '../messaging/MessageTransport'
 import * as fs from "fs"
-import { APP_PORT, logger } from '../shared/utils'
+import { APP_PORT, logger } from '../../shared/utils'
 import * as http from 'http'
 import { IncomingMessage, ServerResponse } from 'http'
-import { StringToString } from '../shared/Types'
+import { StringToString } from '../../shared/Types'
 import * as WebSocketServer from 'websocket'
 import { request } from 'websocket'
 

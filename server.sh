@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-ts-node src/server/index.ts
+ts-node src/server/boot/index.ts

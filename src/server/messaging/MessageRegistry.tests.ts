@@ -2,8 +2,8 @@
 
 import { assert } from 'chai'
 import MessageRegistry from './MessageRegistry'
-import TimeSource from '../shared/TimeSource'
-import ChatMessage from '../shared/model/ChatMessage'
+import TimeSource from '../../shared/TimeSource'
+import ChatMessage from '../../shared/model/ChatMessage'
 
 describe('Message Registry', function () {
 

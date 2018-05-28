@@ -68,7 +68,7 @@ export default class WebSocketMessage {
         break
       case Room:
         typedPayload = new Room(
-          payload.name, payload.messages).withId(payload.id)
+          payload.name, payload.messages).withId(payload._id)
         break
       case RoomJoinedPayload:
         typedPayload = new RoomJoinedPayload(

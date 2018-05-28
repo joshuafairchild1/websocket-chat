@@ -1,7 +1,7 @@
 'use strict'
 
-import { logger} from '../shared/utils'
-import ChatMessage from '../shared/model/ChatMessage'
+import { logger} from '../../shared/utils'
+import ChatMessage from '../../shared/model/ChatMessage'
 
 const log = logger('MessageRegistry')
 

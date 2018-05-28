@@ -1,12 +1,12 @@
 'use strict'
 
-import { logger } from '../shared/utils'
-import ChatMessage from '../shared/model/ChatMessage'
-import MessageRegistry from './MessageRegistry'
-import User from '../shared/model/User'
+import { logger } from '../../shared/utils'
+import ChatMessage from '../../shared/model/ChatMessage'
+import MessageRegistry from '../messaging/MessageRegistry'
+import User from '../../shared/model/User'
 import { connection } from 'websocket'
 import { EventEmitter } from 'events'
-import { Closeable } from '../shared/Types'
+import { Closeable } from '../../shared/Types'
 
 
 export default class RoomChannel extends EventEmitter implements Closeable {

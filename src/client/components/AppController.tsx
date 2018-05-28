@@ -27,7 +27,7 @@ export default class AppController extends Component<AppControllerProps> {
 
   private get roomId(): string | null {
     const { selectedRoom } = this.props
-    return selectedRoom && selectedRoom.id || null
+    return selectedRoom && selectedRoom._id || null
   }
 
   private showAllRooms() {
