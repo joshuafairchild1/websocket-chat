@@ -11,20 +11,20 @@ import { MessagePayload } from '../Types'
 const { server, client } = MessageType
 const NO_PAYLOAD = Symbol('no-payload')
 const PAYLOAD_TYPES = {
-  [server.newConnection.name()]: ConnectPayload,
-  [server.newRoom.name()]: Room,
-  [server.newMessage.name()]: ChatMessage,
+  [server.newConnection.name]: ConnectPayload,
+  [server.newRoom.name]: Room,
+  [server.newMessage.name]: ChatMessage,
   // payload: new username
-  [server.updateUsername.name()]: String,
+  [server.updateUsername.name]: String,
   // payload: ChatMessage[]
-  [server.updateMessages.name()]: Array,
-  [server.roomJoined.name()]: RoomJoinedPayload,
-  [client.createRoom.name()]: Room,
+  [server.updateMessages.name]: Array,
+  [server.roomJoined.name]: RoomJoinedPayload,
+  [client.createRoom.name]: Room,
   // payload: subscriptionId
-  [client.disconnect.name()]: String,
-  [client.sendChat.name()]: ChatMessage,
+  [client.disconnect.name]: String,
+  [client.sendChat.name]: ChatMessage,
   // payload: username to set
-  [client.setUsername.name()]: String
+  [client.setUsername.name]: String
 }
 
 export default class WebSocketMessage {
@@ -38,11 +38,11 @@ export default class WebSocketMessage {
     public roomId: string = null
   ) {
     MessageType.validate(messageType)
-    const name = messageType.name()
+    const name = messageType.name
     if (payload) {
       WebSocketMessage.validatePayload(name, payload)
     } else if (messageType.requiresPayload()) {
-      throw Error(`payload is required for message type ${messageType.name()}`)
+      throw Error(`payload is required for message type ${messageType.name}`)
     }
 		this.type = name
     Object.freeze(this)

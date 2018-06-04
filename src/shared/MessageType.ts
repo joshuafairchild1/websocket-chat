@@ -13,7 +13,7 @@ export default class MessageType {
     KNOWN_MESSAGE_TYPES.set(type, this)
   }
 
-  name(): string {
+  get name(): string {
     return this[NAME]
   }
 
@@ -44,7 +44,7 @@ export default class MessageType {
   }
 
   static validate(type: MessageType | string) {
-    const name = (type instanceof MessageType) ? type.name() : type
+    const name = (type instanceof MessageType) ? type.name : type
     if (MessageType.forName(name)) {
       return
     }

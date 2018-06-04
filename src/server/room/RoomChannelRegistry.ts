@@ -20,17 +20,17 @@ export default class RoomChannelRegistry {
   ensureChannelFor(roomId: string): RoomChannel {
     const existing = this.channels.get(roomId)
     if (existing) {
-      log('found existing room channel for room', roomId)
+      log.info('found existing room channel for room', roomId)
       return existing
     }
-    log('creating new room channel for room', roomId)
+    log.info('creating new room channel for room', roomId)
     return this.create(roomId)
   }
 
   private create(roomId: string): RoomChannel {
     const channel = new RoomChannel(roomId)
     channel.on('close', () => {
-      log('closing room channel for room', roomId)
+      log.info('closing room channel for room', roomId)
       this.channels.delete(roomId)
     })
     this.channels.set(roomId, channel)

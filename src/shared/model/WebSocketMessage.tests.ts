@@ -16,14 +16,14 @@ describe('WebSocketMessage', function () {
   it('validates message payload', function () {
     const validate = (type: string, payload: MessagePayload) =>
       WebSocketMessage.validatePayload(type, payload)
-    validate(server.newConnection.name(), new ConnectPayload([], 'subscriptionId'))
-    validate(server.newMessage.name(), new ChatMessage('someId', 'Name', 'Hello'))
-    validate(server.updateUsername.name(), 'new username')
-    validate(server.updateMessages.name(), [])
-    validate(client.sendChat.name(), new ChatMessage('someId', 'Name', 'bonjour'))
-    validate(client.setUsername.name(), 'Username')
+    validate(server.newConnection.name, new ConnectPayload([], 'subscriptionId'))
+    validate(server.newMessage.name, new ChatMessage('someId', 'Name', 'Hello'))
+    validate(server.updateUsername.name, 'new username')
+    validate(server.updateMessages.name, [])
+    validate(client.sendChat.name, new ChatMessage('someId', 'Name', 'bonjour'))
+    validate(client.setUsername.name, 'Username')
     assert.throws(
-      () => validate(server.newConnection.name(),
+      () => validate(server.newConnection.name,
         new ChatMessage('someId', 'Name', 'Hello')),
       'payload not of type')
   })

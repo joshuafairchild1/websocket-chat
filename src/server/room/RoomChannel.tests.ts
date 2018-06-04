@@ -2,70 +2,50 @@
 
 import { connection } from 'websocket'
 import RoomChannel from './RoomChannel'
-import ChatMessage from '../../shared/model/ChatMessage'
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 
 const ROOM_ID = 'someRoomId'
 
-import User from '../../shared/model/User'
-
 describe('RoomChannel', function () {
 
   let uut: RoomChannel
+  let connection: connection
 
   beforeEach(() => {
     uut = new RoomChannel(ROOM_ID)
+    connection = sinon.mock(connection) as any as connection
   })
 
-  it.skip('user joins, sends a message and leaves', function () {
-    // const add = sinon.spy<MessageRegistry>(messages, 'add')
-    const wsConnection: any = sinon.mock(connection)
-    const newUser = uut.newUser(wsConnection)
-    const message = new ChatMessage(newUser.clientId, newUser.name, 'Hello')
-    uut.addMessage(message)
-    uut.forEachUser(user =>
-      assert.deepEqual(newUser, user))
-    // sinon.assert.calledOnce(add)
-    // assert.isTrue(add.calledWith(message))
+  it('user joins', function () {
+    const user = uut.newUser(connection)
+    assert.isTrue(delete user.clientId)
+    assert.deepEqual(user, { name: 'Anonymous', connection })
+  })
 
-    uut.userLeft(newUser.clientId)
+  it('user leaves', function () {
+    const { clientId } = uut.newUser(connection)
+    uut.userLeft(clientId)
     uut.forEachUser(user => {
-      if (user.clientId === newUser.clientId) {
+      if (user.clientId === clientId) {
         throw Error('test failed, user was not deleted from clients Map')
       }
     })
   })
 
-  it.skip('gets messages', function () {
-    const user1 = new User(sinon.mock(connection) as any)
-    const user2 = new User(sinon.mock(connection) as any)
-    const testMessages = [
-      new ChatMessage(user1.clientId, user1.name, 'Message1'),
-      new ChatMessage(user1.clientId, user1.name, 'Message2'),
-      new ChatMessage(user2.clientId, user2.name, 'Message3')
-    ]
-    testMessages.forEach(uut.addMessage.bind(uut))
-    const result = uut.getMessages()
-    assert.deepEqual(result, testMessages)
+  it('gets user or throws', function () {
+    const user = uut.newUser(connection)
+    assert.deepEqual(user, uut.getUser(user.clientId))
+    uut.userLeft(user.clientId)
+    assert.throws(() => uut.getUser(user.clientId), 'could not locate user')
   })
 
-  it.skip('updates user\'s name and any of their messages', function () {
-    const user = uut.newUser(sinon.mock(connection) as any)
-    const newName = 'Han Solo'
-    const testMessages = [
-      new ChatMessage(user.clientId, user.name, 'Message1'),
-      new ChatMessage(user.clientId, user.name, 'Message2')
-    ]
-    // const updateNameFor = sinon.spy<MessageRegistry>(messages, 'updateNameFor')
-    testMessages.forEach(uut.addMessage.bind(uut))
-    uut.newUsername(user.clientId, newName)
-    const result = uut.getMessages()
-    const expected = testMessages.map((msg: ChatMessage) =>
-      ({ ...msg, senderName: newName }))
-    assert.deepEqual(result, expected)
-    // sinon.assert.calledOnce(updateNameFor)
-    // assert.isTrue(updateNameFor.calledWith(user.clientId, user.name))
+  it('closes when the last user leaves', function () {
+    assert.isFalse(uut.isActive)
+    const user = uut.newUser(connection)
+    assert.isTrue(uut.isActive)
+    uut.userLeft(user.clientId)
+    assert.isFalse(uut.isActive)
   })
 
 })

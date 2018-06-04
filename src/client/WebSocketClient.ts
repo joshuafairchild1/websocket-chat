@@ -14,34 +14,37 @@ export enum WS_READY_STATES {
 const log = logger('WebSocketClient')
 
 export default class WebSocketClient implements Closeable {
-
   private onMessageHandler: Function | null = null
 
 	constructor(private readonly socket: WebSocket) {
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
     handle('message', this.handleMessage)
     handle('open', this.onOpen)
-    handle('error', (ex: ErrorEvent) => console.error('web socket exception:', ex))
+    handle('error', (ex: ErrorEvent) => log.error('web socket exception:', ex))
 		setTimeout(() => {
 			if (socket.readyState !== WS_READY_STATES.OPEN) {
-				console.error('web socket could not make a connection after five seconds')
+				log.error('web socket could not make a connection after five seconds')
 			}
 		}, STARTUP_TIMEOUT)
 	}
+
+  get isActive() {
+    return !!this.onMessageHandler
+  }
 
 	sendMessage(
 	  type: MessageType, payload: ClientMessagePayload = null,
     clientId: string | null = null, roomId: string | null = null
   ) {
 	  if (!clientId && type.requiresClientId()) {
-	    throw Error('client ID is required to send message of type ' + type.name())
+	    throw Error('client ID is required to send message of type ' + type.name)
     }
     if (!roomId && type.requiresRoomId()) {
-      throw Error('room ID is required to send message of type ' + type.name())
+      throw Error('room ID is required to send message of type ' + type.name)
     }
 		const message = new WebSocketMessage(
 		  type, payload, clientId, roomId).forTransport()
-		log('sending message', message)
+		log.info('sending message', message)
 		this.socket.send(message)
 	}
 
@@ -49,11 +52,11 @@ export default class WebSocketClient implements Closeable {
 	  this.onMessageHandler = (message: MessageEvent) => {
       const { data, origin } = message
       if (origin !== 'ws://localhost:' + APP_PORT) {
-        log('message received from non-local origin', message)
+        log.warn('message received from non-local origin', message)
         return
       }
       const { type, payload } = WebSocketMessage.fromString(data)
-      log(`received message "${type}"`)
+      log.info(`received message "${type}"`)
       handlePayload(payload)
     }
   }
@@ -63,14 +66,14 @@ export default class WebSocketClient implements Closeable {
   }
 
   private handleMessage(message: MessageEvent) {
-	  if (!this.onMessageHandler) {
+	  if (!this.isActive) {
 	    throw Error('cannot handle incoming message, "onMessage" was never called')
     }
     this.onMessageHandler(message)
   }
 
 	private onOpen() {
-	  log('web socket connection opened')
+	  log.info('web socket connection opened')
 		this.sendMessage(MessageType.client.connect)
 	}
 

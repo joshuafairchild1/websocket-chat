@@ -23,7 +23,7 @@ export default class Application {
     const httpServer = this.initHttpServer()
     const wsServer = new WebSocketServer.server({ httpServer })
     httpServer.listen(APP_PORT,
-      () => log(new Date(), 'listening on port', APP_PORT))
+      () => log.info(new Date(), 'listening on port', APP_PORT))
     wsServer.on('request', (request: request) =>
       transport.registerConnection(request.accept(null, request.origin)))
   }
@@ -33,15 +33,15 @@ export default class Application {
       ((request: IncomingMessage, response: ServerResponse) =>
       {
         const { url } = request
-        log('request received for', url)
+        log.info('request received for', url)
         const path: string = SERVED_FILES[url]
         if (!path) {
-          log('not fulfilling request for asset', url)
+          log.warn('not fulfilling request for asset', url)
           return
         }
         fs.readFile(path, (error, content) => {
           if (error) {
-            log('error reading file', path, error)
+            log.error('error reading file', path, error)
             return
           }
           response.writeHead(200, { 'Content-Type': 'text/html' })

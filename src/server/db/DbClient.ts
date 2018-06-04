@@ -12,10 +12,10 @@ class DbClient {
       const db = await new Promise<Db>((resolve, reject) =>
         MongoClient.connect('mongodb://localhost:27017/ws-chat',
           (ex, client) => ex ? reject(ex) : resolve(client.db('ws-chat'))))
-      log('opened new database connection')
+      log.info('opened new database connection')
       return db
     } catch (ex) {
-      log('exception opening database connection', ex)
+      log.error('exception opening database connection', ex)
     }
   }
 }

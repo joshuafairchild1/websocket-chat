@@ -1,16 +1,14 @@
 'use strict'
 
 import { assert } from 'chai'
-import WebSocketClient, { WS_READY_STATES } from './WebSocketClient'
+import WebSocketClient from './WebSocketClient'
 import { EventEmitter } from 'events'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
 import MessageType from '../shared/MessageType'
+import { APP_PORT } from '../shared/utils'
 
 class MockSocket extends EventEmitter {
   invocations: string[] = []
-  isClosed = false
-  // noinspection JSUnusedGlobalSymbols - required for testing
-  readyState = WS_READY_STATES.OPEN
 
   // noinspection JSUnusedGlobalSymbols - required for testing
   addEventListener(event: string, handler: (...args: any[]) => void) {
@@ -20,11 +18,6 @@ class MockSocket extends EventEmitter {
   // noinspection JSUnusedGlobalSymbols - required for testing
   send(message: string) {
     this.invocations.push(message)
-  }
-
-  // noinspection JSUnusedGlobalSymbols - required for testing
-  close() {
-    this.isClosed = true
   }
 
 }
@@ -47,4 +40,23 @@ describe('WebSocketClient', function() {
     assert.equal(invocations[0], expected)
   })
 
+  it('throws when message comes in but no handler was provided', function () {
+    assert.throws(
+      () => socket.emit('message'),
+      'cannot handle incoming message, "onMessage" was never called')
+  })
+
+  it('calls the handler provided to onMessage', function (done) {
+    const payload = 'name'
+    const message = new WebSocketMessage(MessageType.client.setUsername, payload)
+    const messageEvent = {
+      data: message.forTransport(),
+      origin: 'ws://localhost:' + APP_PORT,
+    }
+    uut.onMessage(p => {
+      assert.equal(p, payload)
+      done()
+    })
+    socket.emit('message', messageEvent)
+  })
 })

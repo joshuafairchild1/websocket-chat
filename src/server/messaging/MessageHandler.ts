@@ -8,7 +8,7 @@ import ChatMessage from '../../shared/model/ChatMessage'
 import Room from '../../shared/model/Room'
 import { logger } from '../../shared/utils'
 import { connection } from 'websocket'
-import MessageTransport from './MessageTransport'
+import MessageTransport, { MESSAGE_IDENTIFIER } from './MessageTransport'
 import { Subscription } from './Subscription'
 import RoomStore from '../store/RoomStore'
 
@@ -22,25 +22,29 @@ export default class MessageHandler {
     private transport: MessageTransport,
     private roomStore: RoomStore
   ) {
-    this.handle = this.handle.bind(this)
+    transport.on(MESSAGE_IDENTIFIER, this.handle.bind(this))
   }
 
-  handle(connection: connection, message: WebSocketMessage) {
-    switch (MessageType.forName(message.type)) {
-      case client.connect:
-        return this.handleConnect(connection)
-      case client.disconnect:
-        return this.handleDisconnect(message.payload)
-      case client.sendChat:
-        return this.handleChatMessage(message.payload, message.roomId)
-      case client.setUsername:
-        return this.handleNewUsername(connection, message)
-      case client.createRoom:
-        return this.handleNewRoom(message.payload)
-      case client.joinRoom:
-        return this.handleJoinRoom(connection, message.roomId)
-      case client.leaveRoom:
-        return this.handleLeaveRoom(message.clientId, message.roomId)
+  async handle(connection: connection, message: WebSocketMessage) {
+    try {
+      switch (MessageType.forName(message.type)) {
+        case client.connect:
+          return await this.handleConnect(connection)
+        case client.disconnect:
+          return await this.handleDisconnect(message.payload)
+        case client.sendChat:
+          return await this.handleChatMessage(message.payload, message.roomId)
+        case client.setUsername:
+          return await this.handleNewUsername(connection, message)
+        case client.createRoom:
+          return await this.handleNewRoom(message.payload)
+        case client.joinRoom:
+          return await this.handleJoinRoom(connection, message.roomId)
+        case client.leaveRoom:
+          return await this.handleLeaveRoom(message.clientId, message.roomId)
+      }
+    } catch (ex) {
+      log.error('error handling message:', ex)
     }
   }
 
@@ -48,31 +52,23 @@ export default class MessageHandler {
     const { subscribers } = this.transport
     const sub = new Subscription(connection)
     subscribers.set(sub.id, sub)
-    log(`new subscriber ${sub.id},`, subscribers.size, 'total subscriptions')
-    try {
-      const payload = new ConnectPayload([...await this.roomStore.getAll()], sub.id)
-      connection.sendUTF(new WebSocketMessage(
-        MessageType.server.newConnection, payload).forTransport())
-    } catch (ex) {
-      log('error sending new connection payload', ex)
-    }
+    log.info(`new subscriber ${sub.id},`, subscribers.size, 'total subscriptions')
+    const payload = new ConnectPayload([...await this.roomStore.getAll()], sub.id)
+    connection.sendUTF(new WebSocketMessage(
+      MessageType.server.newConnection, payload).forTransport())
   }
 
   private handleDisconnect(subscriptionId: string) {
     const { subscribers } = this.transport
     subscribers.delete(subscriptionId)
-    log(`subscription cancelled for subscriber ${subscriptionId},`,
+    log.info(`subscription cancelled for subscriber ${subscriptionId},`,
       subscribers.size, 'subscriptions remaining')
   }
 
   private async handleChatMessage(message: ChatMessage, roomId: string) {
     const { transport } = this
-    try {
-      await this.throwIfNoRoom(roomId)
-      await this.roomStore.addMessage(roomId, message)
-    } catch (ex) {
-      throw Error('could not add new chat message: ' + JSON.stringify(ex))
-    }
+    await this.throwIfNoRoom(roomId)
+    await this.roomStore.addMessage(roomId, message)
     transport.sendToAllInRoom(roomId, server.newMessage, message)
   }
 
@@ -81,18 +77,14 @@ export default class MessageHandler {
     const { clientId, payload: name, roomId } = message
     const { transport } = this
     const channel = transport.channelFor(roomId)
-    try {
-      await this.roomStore.updateMessages(roomId, clientId, name)
-      connection.sendUTF(
-        new WebSocketMessage(server.updateUsername, name).forTransport())
-      const systemMessage = new ChatMessage('System', 'System',
-        `User ${channel.getUser(clientId).name} changed their name to ${name}`)
-      await this.handleChatMessage(systemMessage, roomId)
-      transport.sendToAllInRoom(
-        roomId, server.updateMessages, await this.roomStore.getMessages(roomId))
-    } catch (ex) {
-      log('error sending message', ex)
-    }
+    await this.roomStore.updateMessages(roomId, clientId, name)
+    connection.sendUTF(
+      new WebSocketMessage(server.updateUsername, name).forTransport())
+    const systemMessage = new ChatMessage('System', 'System',
+      `User ${channel.getUser(clientId).name} changed their name to ${name}`)
+    await this.handleChatMessage(systemMessage, roomId)
+    transport.sendToAllInRoom(
+      roomId, server.updateMessages, await this.roomStore.getMessages(roomId))
   }
 
   private async handleNewRoom(room: Room) {
@@ -100,44 +92,35 @@ export default class MessageHandler {
     if (await this.roomStore.hasName(name)) {
       throw Error(`duplicate room detected: ${name}`)
     }
-    try {
-      const created = await this.roomStore.create(room)
-      this.transport.sendToAllSubscribers(server.newRoom, created)
-    } catch (ex) {
-      log('exception creating new room: ', ex)
-    }
+    const created = await this.roomStore.create(room)
+    this.transport.sendToAllSubscribers(server.newRoom, created)
   }
 
   private async handleJoinRoom(connection: connection, roomId: string) {
-    try {
-      await this.throwIfNoRoom(roomId)
-      const channel = this.transport.channels.ensureChannelFor(roomId)
-      const { clientId } = channel.newUser(connection)
-      const payload = new RoomJoinedPayload(
-        roomId, clientId, await this.roomStore.getMessages(roomId))
-      connection.sendUTF(new WebSocketMessage(
-        MessageType.server.roomJoined, payload).forTransport())
-    } catch (ex) {
-      log('error handling joinRoom message', ex)
-    }
+    await this.throwIfNoRoom(roomId)
+    const channel = this.transport.channels.ensureChannelFor(roomId)
+    const { clientId } = channel.newUser(connection)
+    const payload = new RoomJoinedPayload(
+      roomId, clientId, await this.roomStore.getMessages(roomId))
+    connection.sendUTF(new WebSocketMessage(
+      MessageType.server.roomJoined, payload).forTransport())
   }
 
   private async handleLeaveRoom(clientId: string, roomId: string) {
-    try {
-      await this.throwIfNoRoom(roomId)
-      const channel = this.transport.channelFor(roomId)
-      channel.userLeft(clientId)
-      if (channel.isActive) {
-        await this.handleChatMessage(new ChatMessage(
-          'System', 'System', `User ${clientId} has disconnected`), roomId)
-      }
-    } catch (ex) {
-      log('error handling leaveRoom message', ex)
+    await this.throwIfNoRoom(roomId)
+    const channel = this.transport.channelFor(roomId)
+    channel.userLeft(clientId)
+    if (channel.isActive) {
+      await this.handleChatMessage(new ChatMessage(
+        'System', 'System', `User ${clientId} has disconnected`), roomId)
+    } else {
+      log.error('leave room message received on closed channel',
+        roomId, 'for user', clientId)
     }
   }
 
   private async throwIfNoRoom(roomId: string) {
-    if (!(await this.roomStore.hasId(roomId))) {
+    if (!(await this.roomStore.get(roomId))) {
       throw Error('no room found for id ' + roomId)
     }
   }

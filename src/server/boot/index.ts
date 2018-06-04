@@ -4,14 +4,24 @@ import MessageTransport from '../messaging/MessageTransport'
 import Application from './Application'
 import RoomChannelRegistry from '../room/RoomChannelRegistry'
 import RoomStore from '../store/RoomStore'
+import MessageHandler from '../messaging/MessageHandler'
+import { logger } from '../../shared/utils'
 
-(async () => {
+const log = logger('Startup')
+const startup = 'server startup took'
+
+;(async () => {
+  log.time(startup)
   try {
     const channels = new RoomChannelRegistry()
-    const rooms = await new RoomStore().initializeCollection() /* ugh */ as RoomStore
-    const transport = new MessageTransport(channels, rooms)
+    const transport = new MessageTransport(channels)
+    const roomStore = await new RoomStore().initializeCollection<RoomStore>()
+    // hooks into the transport on instantiation
+    new MessageHandler(transport, roomStore)
     new Application(transport)
   } catch (ex) {
-    console.log('STARTUP ERROR:', ex)
+    log.error('STARTUP ERROR:', ex)
+  } finally {
+    log.timeEnd(startup)
   }
 })()

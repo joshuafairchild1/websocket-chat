@@ -1,5 +1,6 @@
 'use strict'
 
+import * as Logger from 'js-logger'
 export const APP_PORT = 4200
 
 // https://gist.github.com/gordonbrander/2230317
@@ -11,7 +12,7 @@ export function makeHandlerHelper(
   consumer: any, methodName: string, receiver: any | null = null
 ) {
   if (!consumer || !consumer[methodName]) {
-    throw Error(`method ${methodName} not present on ${consumer}`)
+    throw Error(`method ${methodName} not present on ${JSON.stringify(consumer)}`)
   }
   return (eventName: string, handler: Function) => {
     consumer[methodName](eventName, handler.bind(receiver))
@@ -41,11 +42,13 @@ export const scrollToBottom = (el: Element) => {
   el.scrollTop = el.scrollHeight
 }
 
+Logger.useDefaults()
+
 export const logger = (label: string) => {
   if (!label) {
-    throw Error('label required')
+    throw Error('label required for logger')
   }
-  return (...statements: any[]) => console.log(`[ ${label} ]`, ...statements)
+  return Logger.get(label)
 }
 
 export const scrollMessageList = () => scrollToBottom(findElement('.message-list'))

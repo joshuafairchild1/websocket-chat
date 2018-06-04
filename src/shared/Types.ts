@@ -20,4 +20,5 @@ export interface StringToString {
 
 export interface Closeable {
   close: VoidFunction
+  isActive: boolean
 }

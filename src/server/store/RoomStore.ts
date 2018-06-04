@@ -16,7 +16,7 @@ export default class RoomStore extends ServerStore {
 
   async create(room: Room): Promise<Room> {
     const { insertedId } = await this.collection.insertOne(room)
-    log('created new room', insertedId)
+    log.info('created new room', insertedId)
     return room.withId(insertedId.toString())
   }
 
@@ -26,10 +26,6 @@ export default class RoomStore extends ServerStore {
 
   async hasName(name: string): Promise<Boolean> {
     return !!(await this.collection.findOne({ name }))
-  }
-
-  async hasId(roomId: string): Promise<Boolean> {
-    return !!(await this.collection.findOne(idQuery(roomId)))
   }
 
   async get(roomId: string): Promise<Room | null> {

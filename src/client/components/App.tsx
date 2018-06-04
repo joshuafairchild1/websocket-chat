@@ -34,7 +34,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return <AppController
       {...this.props}
       {...this.state}
-      setState={this.stateManager.set}
+      setState={this.stateManager.handleState}
     />
   }
 

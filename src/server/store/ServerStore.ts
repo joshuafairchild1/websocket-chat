@@ -9,9 +9,9 @@ export default class ServerStore {
 
   constructor(private collectionName: string) {}
 
-  async initializeCollection(): Promise<ServerStore> {
+  async initializeCollection <T extends ServerStore> (): Promise<T> {
     this.collection = (await DbClient.connect()).collection(this.collectionName)
-    return this
+    return this as any as T
   }
 
 }
