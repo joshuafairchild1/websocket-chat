@@ -53,6 +53,10 @@ export default class RoomChannel extends EventEmitter implements Closeable {
     return user
   }
 
+  newUsername(clientId: string, newName: string) {
+    this.getUser(clientId).name = newName
+  }
+
   close() {
     this.log.info(`emitting "close" event on channel for room ${this.roomId}`)
     this.emit('close')

@@ -2,11 +2,11 @@ import * as React from 'react'
 import ChatMessage from '../../shared/model/ChatMessage'
 import * as moment from 'moment'
 
-interface MessageHistoryProps {
+interface MessageListProps {
   messages: ChatMessage[]
 }
 
-const MessageHistory: React.SFC<MessageHistoryProps> = props =>
+const MessageList: React.SFC<MessageListProps> = props =>
   <div className='message-list'>
     {props.messages.map((message, index) =>
       <p key={message.timestamp + index}
@@ -16,4 +16,4 @@ const MessageHistory: React.SFC<MessageHistoryProps> = props =>
       </p>)}
   </div>
 
-export default MessageHistory
+export default MessageList

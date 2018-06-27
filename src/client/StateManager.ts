@@ -41,7 +41,7 @@ export default class StateManager {
         const room = rooms.find(room => room._id === roomId)
         room.messages = messages
         return this.set(
-          { selectedRoom: room, userName: clientId, clientId }, true)
+          { selectedRoom: room, clientId }, true)
       }
       default: return this.set(newState as any)
     }

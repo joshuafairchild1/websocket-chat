@@ -1,6 +1,6 @@
 'use strict'
 
-import MessageHistory from './MessageHistory'
+import MessageList from './MessageList'
 import ChatForm from './ChatForm'
 import ChatMessage from '../../shared/model/ChatMessage'
 import * as React from 'react'
@@ -32,7 +32,7 @@ const ChatRoom: React.SFC<ChatRoomProps> = props =>
                    submitButtonText='OK'
                    cancel={true} />
       </div>
-      <MessageHistory messages={props.messages}/>
+      <MessageList messages={props.messages}/>
       <ChatForm sendMessage={props.sendMessage}/>
     </div>
   </div>

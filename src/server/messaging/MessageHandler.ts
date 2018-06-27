@@ -11,6 +11,7 @@ import { connection } from 'websocket'
 import MessageTransport, { MESSAGE_IDENTIFIER } from './MessageTransport'
 import { Subscription } from './Subscription'
 import RoomStore from '../store/RoomStore'
+import MessageStore from '../store/MessageStore'
 
 const log = logger('MessageHandler')
 
@@ -20,7 +21,8 @@ export default class MessageHandler {
 
   constructor(
     private transport: MessageTransport,
-    private roomStore: RoomStore
+    private roomStore: RoomStore,
+    private messageStore: MessageStore
   ) {
     transport.on(MESSAGE_IDENTIFIER, this.handle.bind(this))
   }
@@ -68,23 +70,26 @@ export default class MessageHandler {
   private async handleChatMessage(message: ChatMessage, roomId: string) {
     const { transport } = this
     await this.throwIfNoRoom(roomId)
-    await this.roomStore.addMessage(roomId, message)
+    await this.messageStore.addMessage(roomId, message)
     transport.sendToAllInRoom(roomId, server.newMessage, message)
   }
 
-  private async handleNewUsername(connection: connection, message: WebSocketMessage
+  private async handleNewUsername(
+    connection: connection, message: WebSocketMessage
   ) {
     const { clientId, payload: name, roomId } = message
     const { transport } = this
     const channel = transport.channelFor(roomId)
-    await this.roomStore.updateMessages(roomId, clientId, name)
+    await this.messageStore.updateMessages(roomId, name)
+    const previousName = channel.getUser(clientId).name
+    channel.newUsername(clientId, name)
     connection.sendUTF(
       new WebSocketMessage(server.updateUsername, name).forTransport())
     const systemMessage = new ChatMessage('System', 'System',
-      `User ${channel.getUser(clientId).name} changed their name to ${name}`)
+      `User ${previousName} changed their name to "${name}"`)
     await this.handleChatMessage(systemMessage, roomId)
     transport.sendToAllInRoom(
-      roomId, server.updateMessages, await this.roomStore.getMessages(roomId))
+      roomId, server.updateMessages, await this.messageStore.getMessages(roomId))
   }
 
   private async handleNewRoom(room: Room) {
@@ -101,7 +106,7 @@ export default class MessageHandler {
     const channel = this.transport.channels.ensureChannelFor(roomId)
     const { clientId } = channel.newUser(connection)
     const payload = new RoomJoinedPayload(
-      roomId, clientId, await this.roomStore.getMessages(roomId))
+      roomId, clientId, await this.messageStore.getMessages(roomId))
     connection.sendUTF(new WebSocketMessage(
       MessageType.server.roomJoined, payload).forTransport())
   }

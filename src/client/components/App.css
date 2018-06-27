@@ -30,12 +30,12 @@ body {
   overflow: auto;
 }
 
-.room-list-head span {
+.create-room-link {
   margin-left: 0.25em;
   text-decoration: underline;
 }
 
-.room-list-head span:hover {
+.create-room-link:hover {
   color: #FFFFFF;
   cursor: pointer;
 }
