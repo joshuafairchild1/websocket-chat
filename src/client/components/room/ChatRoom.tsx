@@ -1,12 +1,13 @@
 'use strict'
 
-import MessageList from './MessageList'
-import ChatForm from './ChatForm'
-import ChatMessage from '../../shared/model/ChatMessage'
+import MessageList from '../message/MessageList'
+import ChatForm from '../message/ChatForm'
+import ChatMessage from '../../../shared/model/ChatMessage'
 import * as React from 'react'
-import Room from '../../shared/model/Room'
+import Room from '../../../shared/model/Room'
 import { Button } from 'react-materialize'
-import ModalForm from './ModalForm'
+import ModalForm from '../form/ModalForm'
+import './ChatRoom.scss'
 
 type ChatRoomProps = {
   userName: string
@@ -30,7 +31,7 @@ const ChatRoom: React.SFC<ChatRoomProps> = props =>
                    trigger={<Button className='blue-btn'>Change</Button>}
                    onSubmit={props.changeUsername}
                    submitButtonText='OK'
-                   cancel={true} />
+                   allowCancel={true} />
       </div>
       <MessageList messages={props.messages}/>
       <ChatForm sendMessage={props.sendMessage}/>

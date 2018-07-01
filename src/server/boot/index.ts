@@ -9,10 +9,10 @@ import { logger } from '../../shared/utils'
 import MessageStore from '../store/MessageStore'
 
 const log = logger('Startup')
-const startup = 'server startup took'
+const startupMessage = 'server startup took'
 
 ;(async () => {
-  log.time(startup)
+  log.time(startupMessage)
   try {
     const channels = new RoomChannelRegistry()
     const transport = new MessageTransport(channels)
@@ -24,6 +24,6 @@ const startup = 'server startup took'
   } catch (ex) {
     log.error('STARTUP ERROR:', ex)
   } finally {
-    log.timeEnd(startup)
+    log.timeEnd(startupMessage)
   }
 })()

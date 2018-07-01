@@ -3,8 +3,8 @@
 import { Component } from 'react'
 import * as React from 'react'
 import { AppProps, AppState } from './App'
-import ChatRoom from './ChatRoom'
-import RoomList from './RoomList'
+import ChatRoom from './room/ChatRoom'
+import RoomList from './room/RoomList'
 
 type AppControllerProps = {
   setState: (state: Partial<AppState>, callback?: VoidFunction) => void
@@ -30,7 +30,7 @@ export default class AppController extends Component<AppControllerProps> {
     return selectedRoom && selectedRoom._id || null
   }
 
-  private showAllRooms() {
+  private showAllRooms = () => {
     const { props } = this
     props.clientMessenger.leaveRoom(this.props.clientId, this.roomId)
     props.setState({ selectedRoom: null })
@@ -51,7 +51,7 @@ export default class AppController extends Component<AppControllerProps> {
               sendMessage={(text: string) =>
                 clientMessenger.sendMessage(
                   text, props.userName, clientId, roomId)}
-              showAllRooms={this.showAllRooms.bind(this)}/>
+              showAllRooms={this.showAllRooms}/>
           : <RoomList
               rooms={props.rooms}
               sendCreateRoom={clientMessenger.sendCreateRoom}

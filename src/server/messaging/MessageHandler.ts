@@ -24,10 +24,10 @@ export default class MessageHandler {
     private roomStore: RoomStore,
     private messageStore: MessageStore
   ) {
-    transport.on(MESSAGE_IDENTIFIER, this.handle.bind(this))
+    transport.on(MESSAGE_IDENTIFIER, this.handle)
   }
 
-  async handle(connection: connection, message: WebSocketMessage) {
+  handle = async (connection: connection, message: WebSocketMessage) => {
     try {
       switch (MessageType.forName(message.type)) {
         case client.connect:
@@ -86,7 +86,7 @@ export default class MessageHandler {
     connection.sendUTF(
       new WebSocketMessage(server.updateUsername, name).forTransport())
     const systemMessage = new ChatMessage('System', 'System',
-      `User ${previousName} changed their name to "${name}"`)
+      `${previousName} changed their name to "${name}"`)
     await this.handleChatMessage(systemMessage, roomId)
     transport.sendToAllInRoom(
       roomId, server.updateMessages, await this.messageStore.getMessages(roomId))
@@ -114,10 +114,10 @@ export default class MessageHandler {
   private async handleLeaveRoom(clientId: string, roomId: string) {
     await this.throwIfNoRoom(roomId)
     const channel = this.transport.channelFor(roomId)
-    channel.userLeft(clientId)
+    const { name } = channel.userLeft(clientId)
     if (channel.isActive) {
       await this.handleChatMessage(new ChatMessage(
-        'System', 'System', `User ${clientId} has disconnected`), roomId)
+        'System', 'System', `User ${name || clientId} has left the room`), roomId)
     } else {
       log.error('leave room message received on closed channel',
         roomId, 'for user', clientId)

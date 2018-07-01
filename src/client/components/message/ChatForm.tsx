@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { FormEvent } from 'react'
 import { Button } from 'react-materialize'
-import ControlledForm from './ControlledForm'
+import ControlledForm from '../form/ControlledForm'
+import './ChatForm.scss'
 
 interface ChatFormProps {
   sendMessage: (message: string) => void
@@ -17,8 +18,11 @@ export default class ChatForm extends ControlledForm<ChatFormProps> {
   handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
-    this.props.sendMessage(value)
-    this.inputValue = ''
+    const trimmed = value.trim()
+    if (trimmed  !== '') {
+      this.props.sendMessage(trimmed)
+      this.inputValue = ''
+    }
   }
 
   render() {

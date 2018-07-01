@@ -9,16 +9,14 @@ import Room from '../shared/model/Room'
 
 export default class StateManager {
 
-  constructor(private app: App) {
-    this.handleState = this.handleState.bind(this)
-  }
+  constructor(private app: App) {}
 
   set(newState: Partial<AppState>, scrollMessages = false) {
     this.app.setState(
       { ...newState as AppState }, scrollMessages ? scrollMessageList : null)
   }
 
-  handleState(newState: Partial<AppState>): void {
+  handleState = (newState: Partial<AppState>): void =>  {
     if (!newState) {
       return
     }

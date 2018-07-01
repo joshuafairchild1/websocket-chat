@@ -2,7 +2,7 @@
 
 import ControlledForm from './ControlledForm'
 import { ReactNode, KeyboardEvent } from 'react'
-import { closeModal } from '../../shared/utils'
+import { closeModal } from '../../../shared/utils'
 import { Modal } from 'react-materialize'
 import * as React from 'react'
 import ModalAction from './ModalAction'
@@ -12,7 +12,7 @@ interface ModalFormProps {
   header: string
   submitButtonText: string
   onSubmit: (value: string) => void
-  cancel: boolean
+  allowCancel: boolean
 }
 
 export default class ModalForm extends ControlledForm<ModalFormProps> {
@@ -43,7 +43,7 @@ export default class ModalForm extends ControlledForm<ModalFormProps> {
       <ModalAction text={props.submitButtonText}
                    action={this.handleSubmit} />
     ]
-    if (props.cancel) {
+    if (props.allowCancel) {
       actions.push(<ModalAction text='Cancel'/>)
     }
     return (

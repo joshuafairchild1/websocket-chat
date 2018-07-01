@@ -1,0 +1,32 @@
+div.room-list-container {
+  width: 50%;
+  height: 60%;
+  position: absolute;
+  margin: auto;
+  top: 0; left: 0; bottom: 0; right: 0;
+}
+
+div.room-links-container {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+  overflow: auto;
+
+  h5 {
+    cursor: pointer;
+    font-size: 1.7em;
+    padding: 0.5em;
+    box-shadow: var(--default-shadow);
+  }
+}
+
+span.create-room-link {
+  margin-left: 0.25em;
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--color-white);
+    cursor: pointer;
+  }
+
+}

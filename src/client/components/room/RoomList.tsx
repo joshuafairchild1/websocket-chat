@@ -1,10 +1,11 @@
 import * as React from 'react'
-import Room from '../../shared/model/Room'
+import Room from '../../../shared/model/Room'
 import { Component, ReactNode } from 'react'
 import { Button, Modal } from 'react-materialize'
-import ModalForm from './ModalForm'
+import ModalForm from '../form/ModalForm'
+import './RoomList.scss'
 
-export interface RoomListProps {
+interface RoomListProps {
   rooms: Room[]
   sendCreateRoom: (room: Room) => void
   joinRoom: (id: string) => void
@@ -17,23 +18,21 @@ export default class RoomList extends Component<RoomListProps> {
     this.state = { isCreatingRoom: false }
   }
 
-  createRoom(name: string) {
-    this.props.sendCreateRoom(new Room(name))
-  }
+  createRoom = (name: string) => this.props.sendCreateRoom(new Room(name))
 
   createModal(trigger: ReactNode) {
     return <ModalForm
       header='Create a chat room'
       trigger={trigger}
-      onSubmit={this.createRoom.bind(this)}
+      onSubmit={this.createRoom}
       submitButtonText='Create'
-      cancel={true} />
+      allowCancel={true} />
   }
 
   render() {
     const { rooms } = this.props
     return (
-      <div className='room-list-container'>
+      <div className='room-list-container fade-in'>
         {!rooms.length
           ? <div>
               <h4>There are currently no rooms</h4>
@@ -47,7 +46,7 @@ export default class RoomList extends Component<RoomListProps> {
               </h4>)}
             <div className='room-links-container'>
               {rooms.map((room: Room) =>
-                <h5 className='blue-btn waves waves-light room-link'
+                <h5 className='blue-btn fade-in'
                     key={room._id}
                     onClick={() => this.props.joinRoom(room._id)}>
                   {room.name}

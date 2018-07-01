@@ -1,6 +1,6 @@
 import { Component, ChangeEvent, FormEvent } from 'react'
 
-export interface DefaultFormState {
+interface DefaultFormState {
   inputValue: string
 }
 

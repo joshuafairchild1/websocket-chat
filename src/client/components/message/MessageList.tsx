@@ -1,6 +1,7 @@
 import * as React from 'react'
-import ChatMessage from '../../shared/model/ChatMessage'
+import ChatMessage from '../../../shared/model/ChatMessage'
 import * as moment from 'moment'
+import './MessageList.scss'
 
 interface MessageListProps {
   messages: ChatMessage[]
@@ -10,7 +11,7 @@ const MessageList: React.SFC<MessageListProps> = props =>
   <div className='message-list'>
     {props.messages.map((message, index) =>
       <p key={message.timestamp + index}
-         className='chat-message'>
+         className='chat-message fade-in'>
         {message.senderName || message.senderId} (
         {moment(message.timestamp).fromNow()}): {message.content}
       </p>)}

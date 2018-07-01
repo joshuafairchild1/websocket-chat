@@ -1,4 +1,4 @@
-import './App.css'
+import './App.scss'
 import * as React from 'react'
 import WebSocketClient from '../WebSocketClient'
 import Room from '../../shared/model/Room'

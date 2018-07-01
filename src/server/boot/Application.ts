@@ -28,7 +28,7 @@ export default class Application {
       transport.registerConnection(request.accept(null, request.origin)))
   }
 
-  private initHttpServer() {
+  private initHttpServer(): http.Server  {
     return http.createServer(
       ((request: IncomingMessage, response: ServerResponse) =>
       {

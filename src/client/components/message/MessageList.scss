@@ -1,0 +1,15 @@
+div.message-list {
+  text-align: left;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  height: 75%;
+  margin-bottom: var(--nudge);
+
+  p {
+    background-color: var(--color-cool-primary-lighten);
+    padding: var(--nudge);
+    border-radius: var(--nudge);
+    margin: var(--nudge);
+  }
+
+}
