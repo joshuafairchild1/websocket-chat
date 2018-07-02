@@ -15,6 +15,7 @@ const log = logger('WebSocketClient')
 
 export default class WebSocketClient implements Closeable {
   private onMessageHandler: Function | null = null
+  isConnected = false
 
 	constructor(private readonly socket: WebSocket) {
     const handle = makeHandlerHelper(socket, 'addEventListener', this)
@@ -73,6 +74,7 @@ export default class WebSocketClient implements Closeable {
   }
 
 	private onOpen() {
+    this.isConnected = true
 	  log.info('web socket connection opened')
 		this.sendMessage(MessageType.client.connect)
 	}

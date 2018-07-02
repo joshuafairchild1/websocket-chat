@@ -17,7 +17,7 @@ export default class ClientMessenger {
   changeUsername = (name: string, clientId: string, roomId: string) =>
     this.webSocketClient.sendMessage(client.setUsername, name, clientId, roomId)
 
-  sendMessage = (
+  sendChatMessage = (
     text: string, userName: string, clientId: string, roomId: string
   ) => {
     const { webSocketClient } = this

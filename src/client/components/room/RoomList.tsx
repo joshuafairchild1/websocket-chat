@@ -4,11 +4,11 @@ import { Component, ReactNode } from 'react'
 import { Button, Modal } from 'react-materialize'
 import ModalForm from '../form/ModalForm'
 import './RoomList.scss'
+import { Link } from 'react-router-dom'
 
 interface RoomListProps {
   rooms: Room[]
   sendCreateRoom: (room: Room) => void
-  joinRoom: (id: string) => void
 }
 
 export default class RoomList extends Component<RoomListProps> {
@@ -18,15 +18,13 @@ export default class RoomList extends Component<RoomListProps> {
     this.state = { isCreatingRoom: false }
   }
 
-  createRoom = (name: string) => this.props.sendCreateRoom(new Room(name))
-
   createModal(trigger: ReactNode) {
     return <ModalForm
       header='Create a chat room'
       trigger={trigger}
-      onSubmit={this.createRoom}
+      onSubmit={(name: string) => this.props.sendCreateRoom(new Room(name))}
       submitButtonText='Create'
-      allowCancel={true} />
+      allowCancel={true}/>
   }
 
   render() {
@@ -46,11 +44,11 @@ export default class RoomList extends Component<RoomListProps> {
               </h4>)}
             <div className='room-links-container'>
               {rooms.map((room: Room) =>
-                <h5 className='blue-btn fade-in'
-                    key={room._id}
-                    onClick={() => this.props.joinRoom(room._id)}>
-                  {room.name}
-                </h5>)}
+                <Link to={`/room/${room._id}`} key={room._id}>
+                  <h5 className='blue-btn fade-in'>
+                    {room.name}
+                  </h5>
+                </Link>)}
             </div>
           </div>}
       </div>

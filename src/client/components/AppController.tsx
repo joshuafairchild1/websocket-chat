@@ -5,6 +5,8 @@ import * as React from 'react'
 import { AppProps, AppState } from './App'
 import ChatRoom from './room/ChatRoom'
 import RoomList from './room/RoomList'
+import { Switch, Route, RouteComponentProps } from 'react-router-dom'
+import Loading from './Loading'
 
 type AppControllerProps = {
   setState: (state: Partial<AppState>, callback?: VoidFunction) => void
@@ -27,37 +29,37 @@ export default class AppController extends Component<AppControllerProps> {
 
   private get roomId(): string | null {
     const { selectedRoom } = this.props
-    return selectedRoom && selectedRoom._id || null
-  }
-
-  private showAllRooms = () => {
-    const { props } = this
-    props.clientMessenger.leaveRoom(this.props.clientId, this.roomId)
-    props.setState({ selectedRoom: null })
+    return selectedRoom && selectedRoom.id || null
   }
 
   render() {
     const { props, roomId } = this
-    const { clientMessenger, clientId } = props
+    const { clientMessenger, clientId, selectedRoom, userName } = props
+    if (!props.webSocketClient.isConnected) {
+      return <Loading/>
+    }
     return (
-      <div className='app-container'>
-        {props.selectedRoom
-          ? <ChatRoom
-              messages={props.selectedRoom.messages}
-              userName={props.userName}
-              room={props.selectedRoom}
-              changeUsername={(name: string) =>
-                clientMessenger.changeUsername(name, clientId, roomId)}
-              sendMessage={(text: string) =>
-                clientMessenger.sendMessage(
-                  text, props.userName, clientId, roomId)}
-              showAllRooms={this.showAllRooms}/>
-          : <RoomList
-              rooms={props.rooms}
-              sendCreateRoom={clientMessenger.sendCreateRoom}
-              joinRoom={(id: string) => clientMessenger.joinRoom(id)} />
-        }
-      </div>
+      <Switch>
+        <Route exact path='/' render={() =>
+          <RoomList rooms={props.rooms}
+                    sendCreateRoom={clientMessenger.sendCreateRoom}/>}/>
+        <Route exact path='/room/:roomId' render={
+          ({ match }: RouteComponentProps<any>) =>
+            <ChatRoom userName={userName}
+                      room={selectedRoom}
+                      changeUsername={(name: string) =>
+                        clientMessenger.changeUsername(name, clientId, roomId)}
+                      sendMessage={(text: string) =>
+                        clientMessenger.sendChatMessage(
+                          text, props.userName, clientId, roomId)}
+                      joinRoom={() =>
+                        clientMessenger.joinRoom(match.params['roomId'])}
+                      leaveRoom={() => {
+                        clientMessenger.leaveRoom(clientId, roomId)
+                        props.setState({ selectedRoom: null, userName: 'Anonymous' })
+                      }}/>
+        }/>
+      </Switch>
     )
   }
 

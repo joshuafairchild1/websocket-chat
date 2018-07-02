@@ -26,9 +26,13 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname,'public'),
     port: 3000,
-    publicPath: 'http://localhost:3000/dist'
+    publicPath: 'http://localhost:3000/dist',
+    historyApiFallback: true
   },
   // Enable sourcemaps for debugging webpack's output.
   devtool: 'source-map',
-  plugins: [ new webpack.HotModuleReplacementPlugin() ],
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+  ],
 }

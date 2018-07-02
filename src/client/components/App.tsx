@@ -31,11 +31,14 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    return <AppController
-      {...this.props}
-      {...this.state}
-      setState={this.stateManager.handleState}
-    />
+    return (
+      <div className='app-container'>
+        <AppController
+          {...this.props}
+          {...this.state}
+          setState={this.stateManager.handleState}/>
+      </div>
+    )
   }
 
 }

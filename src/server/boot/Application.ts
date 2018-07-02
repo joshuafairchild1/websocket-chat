@@ -34,11 +34,7 @@ export default class Application {
       {
         const { url } = request
         log.info('request received for', url)
-        const path: string = SERVED_FILES[url]
-        if (!path) {
-          log.warn('not fulfilling request for asset', url)
-          return
-        }
+        const path: string = SERVED_FILES[url] || INDEX
         fs.readFile(path, (error, content) => {
           if (error) {
             log.error('error reading file', path, error)

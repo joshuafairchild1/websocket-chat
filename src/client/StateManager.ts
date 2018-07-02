@@ -21,8 +21,11 @@ export default class StateManager {
       return
     }
     const { selectedRoom, rooms } = this.app.state
+    // TODO: either determine the type of newState state in a different way,
+    // or turn off mangling in production to stop this from breaking
     switch (newState.constructor.name) {
-      case ConnectPayload.name: return this.set(newState)
+      case ConnectPayload.name:
+        return this.set({ ...newState, rooms: newState.rooms.map(Room.instance)})
       case String.name: return this.set({ userName: newState } as AppState)
       case Room.name: return this.set({ rooms: [ ...rooms, newState as Room ] })
       case ChatMessage.name: {

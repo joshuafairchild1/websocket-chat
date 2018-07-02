@@ -2,40 +2,62 @@
 
 import MessageList from '../message/MessageList'
 import ChatForm from '../message/ChatForm'
-import ChatMessage from '../../../shared/model/ChatMessage'
 import * as React from 'react'
-import Room from '../../../shared/model/Room'
 import { Button } from 'react-materialize'
 import ModalForm from '../form/ModalForm'
 import './ChatRoom.scss'
+import { Component } from 'react'
+import { Link } from 'react-router-dom'
+import Room from '../../../shared/model/Room'
+import Loading from '../Loading'
 
 type ChatRoomProps = {
-  userName: string
-  messages: ChatMessage[]
   room: Room
+  userName: string
   changeUsername: (name: string) => void
   sendMessage: (text: string) => void
-  showAllRooms: VoidFunction
+  joinRoom: () => void
+  leaveRoom: () => void
 }
 
-const ChatRoom: React.SFC<ChatRoomProps> = props =>
-  <div className='chat-container'>
-    <Button onClick={props.showAllRooms} className='blue-btn'>
-      Back to all rooms
-    </Button>
-    <h1>{props.room.name}</h1>
-    <div className='message-container'>
-      <div className='identity'>
-        <h5>Chatting as {props.userName}</h5>
-        <ModalForm header='New Username'
-                   trigger={<Button className='blue-btn'>Change</Button>}
-                   onSubmit={props.changeUsername}
-                   submitButtonText='OK'
-                   allowCancel={true} />
-      </div>
-      <MessageList messages={props.messages}/>
-      <ChatForm sendMessage={props.sendMessage}/>
-    </div>
-  </div>
+export default class ChatRoom extends Component<ChatRoomProps> {
 
-export default ChatRoom
+  componentDidMount() {
+    this.props.joinRoom()
+  }
+
+  componentWillUnmount() {
+    this.props.leaveRoom()
+  }
+
+  render() {
+    const { props } = this
+    const { room } = props
+    if (!room) {
+      return <Loading/>
+    }
+    return (
+      <div className='chat-container'>
+        <Link to="/">
+          <Button className='blue-btn'>
+              Back to all rooms
+          </Button>
+        </Link>
+        <h1>{room.name}</h1>
+        <div className='message-container'>
+          <div className='identity'>
+            <h5>Chatting as {props.userName}</h5>
+            <ModalForm header='New Username'
+                       trigger={<Button className='blue-btn'>Change</Button>}
+                       onSubmit={props.changeUsername}
+                       submitButtonText='OK'
+                       allowCancel={true}/>
+          </div>
+          <MessageList messages={room.messages}/>
+          <ChatForm sendMessage={props.sendMessage}/>
+        </div>
+      </div>
+    )
+  }
+
+}

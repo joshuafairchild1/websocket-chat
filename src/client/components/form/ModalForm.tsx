@@ -41,7 +41,7 @@ export default class ModalForm extends ControlledForm<ModalFormProps> {
     const { props } = this
     const actions = [
       <ModalAction text={props.submitButtonText}
-                   action={this.handleSubmit} />
+                   action={this.handleSubmit}/>
     ]
     if (props.allowCancel) {
       actions.push(<ModalAction text='Cancel'/>)
