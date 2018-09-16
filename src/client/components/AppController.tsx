@@ -1,35 +1,22 @@
-'use strict'
-
 import { Component } from 'react'
 import * as React from 'react'
-import { AppProps, AppState } from './App'
+import { AppProps } from './App'
 import ChatRoom from './room/ChatRoom'
 import RoomList from './room/RoomList'
 import { Switch, Route, RouteComponentProps } from 'react-router-dom'
 import Loading from './Loading'
+import ActionInvoker from '../state/ActionInvoker'
 
-type AppControllerProps = {
-  setState: (state: Partial<AppState>, callback?: VoidFunction) => void
-} & AppProps & Readonly<AppState>
-
-export default class AppController extends Component<AppControllerProps> {
-
-  constructor(props: AppControllerProps) {
-    super(props)
-  }
+export default class AppController extends Component<AppProps> {
+  private actionInvoker = new ActionInvoker(this.props.actions)
 
   componentDidMount() {
-    this.props.webSocketClient.onMessage(this.props.setState)
+    this.props.webSocketClient.onMessage(this.actionInvoker.invokeFor)
     window.addEventListener('beforeunload', () => {
       const { props, roomId } = this
       const { clientId = null, subscriptionId } = props
       props.clientMessenger.disconnect(subscriptionId, clientId, roomId)
     })
-  }
-
-  private get roomId(): string | null {
-    const { selectedRoom } = this.props
-    return selectedRoom && selectedRoom.id || null
   }
 
   render() {
@@ -53,14 +40,18 @@ export default class AppController extends Component<AppControllerProps> {
                         clientMessenger.sendChatMessage(
                           text, props.userName, clientId, roomId)}
                       joinRoom={() =>
-                        clientMessenger.joinRoom(match.params['roomId'])}
+                        clientMessenger.joinRoom(match.params[ 'roomId' ])}
                       leaveRoom={() => {
                         clientMessenger.leaveRoom(clientId, roomId)
-                        props.setState({ selectedRoom: null, userName: 'Anonymous' })
+                        props.actions.roomLeft()
                       }}/>
         }/>
       </Switch>
     )
   }
 
+  private get roomId(): string | null {
+    const { selectedRoom } = this.props
+    return selectedRoom && selectedRoom._id || null
+  }
 }

@@ -1,5 +1,3 @@
-'use strict'
-
 import MessageList from '../message/MessageList'
 import ChatForm from '../message/ChatForm'
 import * as React from 'react'
@@ -37,7 +35,7 @@ export default class ChatRoom extends Component<ChatRoomProps> {
       return <Loading/>
     }
     return (
-      <div className='chat-container'>
+      <div className='chat-container fade-in'>
         <Link to="/">
           <Button className='blue-btn'>
               Back to all rooms

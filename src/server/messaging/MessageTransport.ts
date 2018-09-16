@@ -3,11 +3,10 @@
 import { logger } from '../../shared/utils'
 import MessageType from '../../shared/MessageType'
 import WebSocketMessage from '../../shared/model/WebSocketMessage'
-import User from '../../shared/model/User'
 import { connection, IMessage } from 'websocket'
 import RoomChannelRegistry from '../room/RoomChannelRegistry'
 import { Subscription } from './Subscription'
-import { MessagePayload } from '../../shared/Types'
+import { ServerMessagePayload } from '../../shared/Types'
 import RoomChannel from '../room/RoomChannel'
 import { EventEmitter } from 'events'
 
@@ -35,15 +34,15 @@ export default class MessageTransport extends EventEmitter {
   }
 
   sendToAllInRoom(
-    roomId: string, messageType: MessageType, payload: MessagePayload
+    roomId: string, messageType: MessageType, payload: ServerMessagePayload
   ) {
     const message = new WebSocketMessage(messageType, payload).forTransport()
-    log.info('sending message to all in room', roomId, message)
+    log.info('sending message to all in room', roomId, messageType.name)
     this.channelFor(roomId)
-      .forEachUser((user: User) => user.connection.sendUTF(message))
+      .forEachUser(user => user.connection.sendUTF(message))
   }
 
-  sendToAllSubscribers(messageType: MessageType, payload: MessagePayload) {
+  sendToAllSubscribers(messageType: MessageType, payload: ServerMessagePayload) {
     const message = new WebSocketMessage(messageType, payload).forTransport()
     log.info('sending message to all subscribers', message)
     this.subscribers.forEach(subscriber =>

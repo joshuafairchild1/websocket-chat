@@ -47,14 +47,13 @@ describe('WebSocketClient', function() {
   })
 
   it('calls the handler provided to onMessage', function (done) {
-    const payload = 'name'
-    const message = new WebSocketMessage(MessageType.client.setUsername, payload)
+    const message = new WebSocketMessage(MessageType.client.setUsername, 'name')
     const messageEvent = {
       data: message.forTransport(),
       origin: 'ws://localhost:' + APP_PORT,
     }
-    uut.onMessage(p => {
-      assert.equal(p, payload)
+    uut.onMessage(emitted => {
+      assert.deepEqual(emitted, message)
       done()
     })
     socket.emit('message', messageEvent)

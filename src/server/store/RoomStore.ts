@@ -9,8 +9,9 @@ const log = logger('RoomStore')
 const idQuery = (value: string) => ({ _id: new ObjectId(value) })
 
 export default class RoomStore extends ServerStore {
-  constructor() {
-    super('room')
+
+  constructor(dbName?: string) {
+    super('room', dbName)
   }
 
   async create(room: Room): Promise<Room> {

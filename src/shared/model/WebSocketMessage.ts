@@ -1,6 +1,6 @@
 'use strict'
 
-import { toJson } from '../utils'
+import { safeDeserialize } from '../utils'
 import ChatMessage from './ChatMessage'
 import ConnectPayload from './ConnectPayload'
 import MessageType from '../MessageType'
@@ -55,7 +55,7 @@ export default class WebSocketMessage {
 	static fromString(utf8String: string): WebSocketMessage {
     const {
       type, payload = null, clientId = null, roomId = null
-    } = toJson(utf8String)
+    } = safeDeserialize<WebSocketMessage>(utf8String)
     const payloadType = WebSocketMessage.payloadTypeFor(type)
     let typedPayload: MessagePayload
     switch (payloadType) {
@@ -100,7 +100,7 @@ export default class WebSocketMessage {
   static validatePayload(typeName: string, payload: MessagePayload) {
     const payloadType = WebSocketMessage.payloadTypeFor(typeName)
 	  if (payloadType !== NO_PAYLOAD && payload.constructor !== payloadType) {
-	    throw Error(`payload not of type ${typeName} ${JSON.stringify(payload)}`)
+	    throw Error(`payload not of type ${typeName}: ${JSON.stringify(payload)}`)
     }
   }
 

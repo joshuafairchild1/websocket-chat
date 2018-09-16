@@ -17,7 +17,7 @@ export default class MessageStore extends ServerStore {
     return await this.collection.find({ roomId }, ).toArray()
   }
 
-  async updateMessages(roomId: string, senderName: any): Promise<void> {
+  async updateMessages(roomId: string, senderName: string): Promise<void> {
     await this.collection.updateMany({ roomId }, { $set: { senderName } })
   }
 

@@ -4,6 +4,7 @@ import Room from '../shared/model/Room'
 import WebSocketClient from './WebSocketClient'
 import MessageType from '../shared/MessageType'
 import ChatMessage from '../shared/model/ChatMessage'
+import { ClientMessagePayload } from '../shared/Types'
 
 const { client } = MessageType
 
@@ -12,34 +13,39 @@ export default class ClientMessenger {
   constructor(private webSocketClient: WebSocketClient) {}
 
   sendCreateRoom = (room: Room) =>
-    this.webSocketClient.sendMessage(client.createRoom, room)
+    this.send(client.createRoom, room)
 
   changeUsername = (name: string, clientId: string, roomId: string) =>
-    this.webSocketClient.sendMessage(client.setUsername, name, clientId, roomId)
+    this.send(client.setUsername, name, clientId, roomId)
 
   sendChatMessage = (
     text: string, userName: string, clientId: string, roomId: string
   ) => {
-    const { webSocketClient } = this
     const message = new ChatMessage(clientId, userName, text)
-    webSocketClient.sendMessage(client.sendChat, message, clientId, roomId)
+    this.send(client.sendChat, message, clientId, roomId)
   }
 
-  joinRoom = (roomId: string) =>
-    this.webSocketClient.sendMessage(client.joinRoom, null, null, roomId)
+  joinRoom = (roomId: string) => this.send(client.joinRoom, null, null, roomId)
 
   leaveRoom = (clientId: string, roomId: string) =>
-    this.webSocketClient.sendMessage(client.leaveRoom, null, clientId, roomId)
+    this.send(client.leaveRoom, null, clientId, roomId)
 
   disconnect = (
-    subscriptionId: string, clientId: string | null = null, roomId: string | null = null
+    subscriptionId: string,
+    clientId: string | null = null,
+    roomId: string | null = null
   ) => {
-    const { webSocketClient } = this
-    if (roomId) {
+    if (clientId && roomId) {
       this.leaveRoom(clientId, roomId)
     }
-    webSocketClient.sendMessage(client.disconnect, subscriptionId)
-    webSocketClient.close()
+    this.send(client.disconnect, subscriptionId)
+    this.webSocketClient.close()
   }
 
+  private send(
+    type: MessageType, payload: ClientMessagePayload = null,
+    clientId: string | null = null, roomId: string | null = null
+  ): void {
+    this.webSocketClient.sendMessage(type, payload, clientId, roomId)
+  }
 }

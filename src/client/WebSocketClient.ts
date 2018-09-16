@@ -4,7 +4,7 @@ import { APP_PORT, logger, makeHandlerHelper }
   from '../shared/utils'
 import MessageType from '../shared/MessageType'
 import WebSocketMessage from '../shared/model/WebSocketMessage'
-import { ClientMessagePayload, Closeable, MessagePayload } from '../shared/Types'
+import { ClientMessagePayload, Closeable } from '../shared/Types'
 
 const STARTUP_TIMEOUT = 5 * 1000
 export enum WS_READY_STATES {
@@ -14,7 +14,6 @@ export enum WS_READY_STATES {
 const log = logger('WebSocketClient')
 
 export default class WebSocketClient implements Closeable {
-  private onMessageHandler: Function | null = null
   isConnected = false
 
 	constructor(private readonly socket: WebSocket) {
@@ -49,16 +48,16 @@ export default class WebSocketClient implements Closeable {
 		this.socket.send(message)
 	}
 
-	onMessage(handlePayload: (payload: MessagePayload) => void) {
+	onMessage(handleMessage: (wsMessage: WebSocketMessage) => void) {
 	  this.onMessageHandler = (message: MessageEvent) => {
       const { data, origin } = message
       if (origin !== 'ws://localhost:' + APP_PORT) {
         log.warn('message received from non-local origin', message)
         return
       }
-      const { type, payload } = WebSocketMessage.fromString(data)
-      log.info(`received message "${type}"`)
-      handlePayload(payload)
+      const wsMessage = WebSocketMessage.fromString(data)
+      log.info(`received message "${wsMessage.type}"`)
+      handleMessage(wsMessage)
     }
   }
 
@@ -78,5 +77,7 @@ export default class WebSocketClient implements Closeable {
 	  log.info('web socket connection opened')
 		this.sendMessage(MessageType.client.connect)
 	}
+
+  private onMessageHandler: Function | null = null
 
 }

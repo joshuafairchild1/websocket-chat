@@ -10,13 +10,13 @@ export function randomId() {
 }
 
 export function makeHandlerHelper(
-  consumer: any, methodName: string, receiver: any | null = null
+  receiver: any, methodName: string, handlerContext: any | null = null
 ) {
-  if (!consumer || !consumer[methodName]) {
-    throw Error(`method ${methodName} not present on ${JSON.stringify(consumer)}`)
+  if (!receiver || !receiver[methodName]) {
+    throw Error(`method ${methodName} not present on ${JSON.stringify(receiver)}`)
   }
   return (eventName: string, handler: Function) => {
-    consumer[methodName](eventName, handler.bind(receiver))
+    receiver[methodName](eventName, handler.bind(handlerContext))
   }
 }
 
@@ -31,7 +31,7 @@ export function findElement(selector: string): Element {
   return el
 }
 
-export function toJson(data: any): any {
+export function safeDeserialize <T> (data: string): T {
   try {
     return JSON.parse(data)
   } catch (ex) {
@@ -39,9 +39,6 @@ export function toJson(data: any): any {
   }
 }
 
-export const scrollToBottom = (el: Element) => {
-  el.scrollTop = el.scrollHeight
-}
 
 Logger.useDefaults()
 
@@ -51,6 +48,8 @@ export const logger = (label: string) => {
   }
   return Logger.get(label)
 }
+
+const scrollToBottom = (el: Element) => el.scrollTop = el.scrollHeight
 
 export const scrollMessageList = () => scrollToBottom(findElement('.message-list'))
 

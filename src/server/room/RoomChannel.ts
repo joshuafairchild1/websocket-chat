@@ -8,7 +8,6 @@ import { Closeable } from '../../shared/Types'
 
 export default class RoomChannel extends EventEmitter implements Closeable {
 
-  readonly [index:string]: any
   private readonly users: Map<string, User> = new Map()
   private log = logger(`RoomChannel-${this.roomId}`)
   isActive = false

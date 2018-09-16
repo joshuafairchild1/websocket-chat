@@ -1,5 +1,3 @@
-'use strict'
-
 import ControlledForm from './ControlledForm'
 import { ReactNode, KeyboardEvent } from 'react'
 import { closeModal } from '../../../shared/utils'
@@ -22,7 +20,7 @@ export default class ModalForm extends ControlledForm<ModalFormProps> {
     this.state = { inputValue: '' }
   }
 
-  handleSubmit() {
+  protected handleSubmit = () => {
     const { inputValue } = this.state
     if (inputValue) {
       this.props.onSubmit(inputValue)
@@ -30,7 +28,7 @@ export default class ModalForm extends ControlledForm<ModalFormProps> {
     }
   }
 
-  handleEnterKey(event: KeyboardEvent<any>) {
+  handleEnterKey = (event: KeyboardEvent<any>) => {
     if (event.key === 'Enter') {
       this.handleSubmit()
       closeModal()
@@ -52,7 +50,7 @@ export default class ModalForm extends ControlledForm<ModalFormProps> {
              trigger={props.trigger}>
         <input value={this.state.inputValue}
                onChange={this.handleChange}
-               onKeyDown={this.handleEnterKey.bind(this)}/>
+               onKeyDown={this.handleEnterKey}/>
       </Modal>
     )
   }

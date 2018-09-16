@@ -7,7 +7,10 @@ export default class ServerStore {
 
   protected collection: Collection
 
-  constructor(private collectionName: string, private dbName: string = 'ws-chat') {}
+  constructor(
+    private collectionName: string,
+    private dbName: string = 'ws-chat'
+  ) {}
 
   async initializeCollection <T extends ServerStore> (): Promise<T> {
     this.collection = (await DbClient.connect(this.dbName))
