@@ -14,7 +14,7 @@ export default class MessageStore extends ServerStore {
   }
 
   async getMessages(roomId: string): Promise<ChatMessage[]> {
-    return await this.collection.find({ roomId }, ).toArray()
+    return await this.collection.find<ChatMessage>({ roomId }).toArray()
   }
 
   async updateMessages(roomId: string, senderName: string): Promise<void> {

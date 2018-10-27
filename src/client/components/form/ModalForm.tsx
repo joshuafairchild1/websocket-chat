@@ -5,7 +5,7 @@ import { Modal } from 'react-materialize'
 import * as React from 'react'
 import ModalAction from './ModalAction'
 
-interface ModalFormProps {
+interface Props {
   trigger: ReactNode
   header: string
   submitButtonText: string
@@ -13,22 +13,19 @@ interface ModalFormProps {
   allowCancel: boolean
 }
 
-export default class ModalForm extends ControlledForm<ModalFormProps> {
+export default class ModalForm extends ControlledForm<Props> {
 
-  constructor(props: ModalFormProps) {
-    super(props)
-    this.state = { inputValue: '' }
-  }
+  readonly state = { inputValue: '' }
 
   protected handleSubmit = () => {
     const { inputValue } = this.state
     if (inputValue) {
       this.props.onSubmit(inputValue)
-      this.inputValue = ''
+      this.reset()
     }
   }
 
-  handleEnterKey = (event: KeyboardEvent<any>) => {
+  protected handleEnterKey = (event: KeyboardEvent<any>) => {
     if (event.key === 'Enter') {
       this.handleSubmit()
       closeModal()

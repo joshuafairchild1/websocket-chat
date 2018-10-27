@@ -2,12 +2,11 @@ import * as React from 'react'
 import StateStore  from './StateStore'
 import { AppProps } from '../components/App'
 
+type ComponentDefinition <T> = React.ComponentClass<T> | React.SFC<T>
+
 /**
  * Adapted from https://gist.github.com/gaearon/1d19088790e70ac32ea636c025ba424e
  */
-
-type ComponentDefinition <T> = React.ComponentClass<T> | React.SFC<T>
-
 export default function connectWithStore<OwnProps>(
   Subscriber: ComponentDefinition<AppProps>
 ): React.ComponentClass<OwnProps> {
@@ -17,7 +16,7 @@ export default function connectWithStore<OwnProps>(
 
     render() {
       return <Subscriber {...this.props}
-                         {...store.getState()}
+                         {...store.state}
                          actions={store.actions} />
     }
 

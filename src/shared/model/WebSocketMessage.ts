@@ -57,36 +57,12 @@ export default class WebSocketMessage {
       type, payload = null, clientId = null, roomId = null
     } = safeDeserialize<WebSocketMessage>(utf8String)
     const payloadType = WebSocketMessage.payloadTypeFor(type)
-    let typedPayload: MessagePayload
-    switch (payloadType) {
-      case ConnectPayload:
-        typedPayload = new ConnectPayload(payload.rooms, payload.subscriptionId)
-        break
-      case ChatMessage:
-        typedPayload = new ChatMessage(
-          payload.senderId, payload.senderName, payload.content)
-        break
-      case Room:
-        typedPayload = new Room(
-          payload.name, payload.messages).withId(payload._id)
-        break
-      case RoomJoinedPayload:
-        typedPayload = new RoomJoinedPayload(
-          payload.roomId, payload.clientId, payload.messages)
-        break
-      case Array:
-        typedPayload = payload.map((message: ChatMessage) =>
-          new ChatMessage(message.senderId, message.senderName, message.content))
-        break
-      case String:
-      case NO_PAYLOAD:
-        typedPayload = payload
-    }
+    const typedPayload = toTypedPayload(payloadType, payload)
     return new WebSocketMessage(
       MessageType.forName(type), typedPayload, clientId, roomId)
   }
 
-  static payloadTypeFor(messageType: string): Function | Symbol  {
+  private static payloadTypeFor(messageType: string): Function | Symbol  {
     if (!MessageType.forName(messageType).requiresPayload()) {
       return NO_PAYLOAD
     }
@@ -97,11 +73,36 @@ export default class WebSocketMessage {
     return type
   }
 
-  static validatePayload(typeName: string, payload: MessagePayload) {
+  private static validatePayload(typeName: string, payload: MessagePayload) {
     const payloadType = WebSocketMessage.payloadTypeFor(typeName)
 	  if (payloadType !== NO_PAYLOAD && payload.constructor !== payloadType) {
 	    throw Error(`payload not of type ${typeName}: ${JSON.stringify(payload)}`)
     }
   }
 
+}
+
+function toTypedPayload(
+  constructorType: Function | Symbol, payload: any
+): MessagePayload {
+  let typedPayload: MessagePayload
+  switch (constructorType) {
+    case ConnectPayload:
+      return new ConnectPayload(payload.rooms, payload.subscriptionId)
+    case ChatMessage:
+      return typedPayload = new ChatMessage(
+        payload.senderId, payload.senderName, payload.content)
+    case Room:
+      return new Room(
+        payload.name, payload.messages).withId(payload._id)
+    case RoomJoinedPayload:
+      return new RoomJoinedPayload(
+        payload.roomId, payload.clientId, payload.messages)
+    case Array:
+      return payload.map((message: ChatMessage) =>
+        new ChatMessage(message.senderId, message.senderName, message.content))
+    case String:
+    case NO_PAYLOAD:
+      return payload
+  }
 }

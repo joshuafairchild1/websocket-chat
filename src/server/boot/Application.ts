@@ -1,7 +1,7 @@
 'use strict'
 
 import MessageTransport from '../messaging/MessageTransport'
-import * as fs from "fs"
+import * as fs from 'fs'
 import { APP_PORT, logger } from '../../shared/utils'
 import * as http from 'http'
 import { IncomingMessage, ServerResponse } from 'http'
@@ -19,32 +19,30 @@ const SERVED_FILES: StringToString = {
 
 export default class Application {
 
-  constructor(transport: MessageTransport) {
-    const httpServer = this.initHttpServer()
+  constructor(private readonly transport: MessageTransport) {
+    const httpServer = http.createServer(this.requestListener)
     const wsServer = new WebSocketServer.server({ httpServer })
     httpServer.listen(APP_PORT,
       () => log.info(new Date(), 'listening on port', APP_PORT))
-    wsServer.on('request', (request: request) =>
-      transport.registerConnection(request.accept(null, request.origin)))
+    wsServer.on('request', this.wsRequestListener)
   }
 
-  private initHttpServer(): http.Server  {
-    return http.createServer(
-      ((request: IncomingMessage, response: ServerResponse) =>
-      {
-        const { url } = request
-        log.info('request received for', url)
-        const path: string = SERVED_FILES[url] || INDEX
-        fs.readFile(path, (error, content) => {
-          if (error) {
-            log.error('error reading file', path, error)
-            return
-          }
-          response.writeHead(200, { 'Content-Type': 'text/html' })
-          response.end(content, 'utf-8')
-        })
-      }))
+  private requestListener = (request: IncomingMessage, response: ServerResponse) => {
+    const { url } = request
+    log.info('request received for', url)
+    const path: string = SERVED_FILES[url] || INDEX
+    fs.readFile(path, (error, content) => {
+      if (error) {
+        log.error('error reading file', path, error)
+        return
+      }
+      response.writeHead(200, { 'Content-Type': 'text/html' })
+      response.end(content, 'utf-8')
+    })
   }
+
+  private wsRequestListener = (request: request) =>
+    this.transport.registerConnection(request.accept(null, request.origin))
 
 }
 

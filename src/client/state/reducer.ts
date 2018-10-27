@@ -8,7 +8,9 @@ const log = logger('RootReducer')
 
 type State = Readonly<AppState>
 
-export default function reduce(state: State, action: StoreAction): State {
+export type Reducer <S, A> = (state: Readonly<S>, action: A) => Readonly<S>
+
+export default function reduce(state: State = new AppState(), action: StoreAction): State {
   const { type, payload } = action
   const { selectedRoom } = state
   log.debug('reducing action', type, 'with payload: ', payload)
@@ -26,8 +28,12 @@ export default function reduce(state: State, action: StoreAction): State {
       const { roomId, clientId, messages } = payload
       const { rooms } = state
       const room = rooms.find(room => room._id === roomId)
-      room.messages = messages
-      return { ...state, selectedRoom: room, clientId }
+      if (room) {
+        room.messages = messages
+      } else {
+        console.warn('room joined payload contained an unknown room ID:', roomId)
+      }
+      return { ...state, selectedRoom: room || null, clientId }
     case Actions.UPDATE_MESSAGES:
       selectedRoom.messages = payload
       return { ...state, selectedRoom }

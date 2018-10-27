@@ -13,6 +13,8 @@ export enum WS_READY_STATES {
 
 const log = logger('WebSocketClient')
 
+type MessageHandler = (event: MessageEvent) => void
+
 export default class WebSocketClient implements Closeable {
   isConnected = false
 
@@ -78,6 +80,6 @@ export default class WebSocketClient implements Closeable {
 		this.sendMessage(MessageType.client.connect)
 	}
 
-  private onMessageHandler: Function | null = null
+  private onMessageHandler: MessageHandler | null = null
 
 }

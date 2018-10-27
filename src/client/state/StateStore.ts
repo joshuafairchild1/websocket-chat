@@ -8,7 +8,7 @@ import ChatMessage from '../../shared/model/ChatMessage'
 import { scrollMessageList } from '../../shared/utils'
 import RoomJoinedPayload from '../../shared/model/RoomJoinedPayload'
 import { ServerMessagePayload } from '../../shared/Types'
-import reduce from './reducer'
+import reducer, { Reducer } from './reducer'
 
 export type ActionCreator = (payload?: ServerMessagePayload) => StoreAction
 
@@ -28,8 +28,8 @@ export class AppState {
 
 export default class StateStore {
 
-  private constructor() {}
-  private state: AppState = new AppState()
+  private constructor(private reduce: Reducer<AppState, StoreAction>) {}
+  private _state: AppState = new AppState()
   private subscribers: VoidFunction[] = []
   actions: ActionCreators = extractStoreActions(this)
 
@@ -52,13 +52,13 @@ export default class StateStore {
    *  the application state and then notifying all subscribers
    */
   dispatch(action: StoreAction): void {
-    this.state = reduce(this.state, action)
+    this._state = this.reduce(this._state, action)
     this.subscribers.forEach(sub => sub())
     action.callback && action.callback()
   }
 
-  getState(): Readonly<AppState> {
-    return this.state
+  get state(): Readonly<AppState> {
+    return this._state
   }
 
   @Dispatcher
@@ -109,11 +109,8 @@ export default class StateStore {
   }
 
   static singleton(): StateStore {
-    const { __instance } = StateStore
-    if (__instance !== null) {
-      return __instance
-    }
-    return StateStore.__instance = new StateStore()
+    return StateStore.__instance
+      || (StateStore.__instance = new StateStore(reducer))
   }
 
   static __instance: StateStore | null = null
@@ -131,7 +128,7 @@ const NON_ACTION_CREATORS = new Set([
 function extractStoreActions(store: StateStore): ActionCreators {
   const __proto__ = Object.getPrototypeOf(store)
   const actions = Object.getOwnPropertyNames(__proto__)
-    .reduce((actions, fieldName) => {
+    .reduce<ActionCreators>((actions, fieldName) => {
       if (NON_ACTION_CREATORS.has(fieldName)) {
         return actions
       }
@@ -140,7 +137,7 @@ function extractStoreActions(store: StateStore): ActionCreators {
         actions[fieldName] = field
       }
       return actions
-    }, <ActionCreators>{})
+    }, {})
   Object.freeze(actions)
   return actions
 }

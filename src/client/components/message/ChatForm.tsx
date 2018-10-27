@@ -9,10 +9,6 @@ interface ChatFormProps {
 }
 
 export default class ChatForm extends ControlledForm<ChatFormProps> {
-  constructor(props: ChatFormProps) {
-    super(props)
-    this.state = { inputValue: '' }
-  }
 
   protected handleSubmit = (event: FormEvent<any>) => {
     event.preventDefault()
@@ -20,7 +16,7 @@ export default class ChatForm extends ControlledForm<ChatFormProps> {
     const trimmed = value.trim()
     if (trimmed !== '') {
       this.props.sendMessage(trimmed)
-      this.inputValue = ''
+      this.reset()
     }
   }
 

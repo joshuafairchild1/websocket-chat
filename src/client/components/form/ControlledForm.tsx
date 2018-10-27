@@ -1,13 +1,13 @@
 import { Component, ChangeEvent, FormEvent } from 'react'
 
-interface DefaultFormState {
-  inputValue: string
+class DefaultFormState {
+  readonly inputValue: string
 }
 
-export default abstract class
-  ControlledForm<Props, State extends DefaultFormState = DefaultFormState>
-    extends Component<Props, State>
+export default abstract class ControlledForm<Props> extends Component<Props, DefaultFormState>
 {
+  readonly state = new DefaultFormState()
+
   protected set inputValue(value: string) {
     this.setState({ inputValue: value })
   }
@@ -16,7 +16,11 @@ export default abstract class
     this.inputValue = event.target.value
   }
   // noinspection JSUnusedLocalSymbols
-  protected abstract handleSubmit = (event?: FormEvent<any>): void => {
+  protected handleSubmit = (event?: FormEvent<any>): void => {
     throw Error('handleSubmit must be implemented by subclass')
+  }
+
+  protected reset() {
+    this.inputValue = ''
   }
 }

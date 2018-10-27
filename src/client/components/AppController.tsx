@@ -12,42 +12,64 @@ export default class AppController extends Component<AppProps> {
 
   componentDidMount() {
     this.props.webSocketClient.onMessage(this.actionInvoker.invokeFor)
-    window.addEventListener('beforeunload', () => {
-      const { props, roomId } = this
-      const { clientId = null, subscriptionId } = props
-      props.clientMessenger.disconnect(subscriptionId, clientId, roomId)
-    })
+    window.addEventListener('beforeunload', this.disconnectHandler)
   }
 
-  render() {
-    const { props, roomId } = this
-    const { clientMessenger, clientId, selectedRoom, userName } = props
-    if (!props.webSocketClient.isConnected) {
+  render(): React.ReactNode {
+    if (!this.props.webSocketClient.isConnected) {
       return <Loading/>
     }
     return (
       <Switch>
-        <Route exact path='/' render={() =>
-          <RoomList rooms={props.rooms}
-                    sendCreateRoom={clientMessenger.sendCreateRoom}/>}/>
-        <Route exact path='/room/:roomId' render={
-          ({ match }: RouteComponentProps<any>) =>
-            <ChatRoom userName={userName}
-                      room={selectedRoom}
-                      changeUsername={(name: string) =>
-                        clientMessenger.changeUsername(name, clientId, roomId)}
-                      sendMessage={(text: string) =>
-                        clientMessenger.sendChatMessage(
-                          text, props.userName, clientId, roomId)}
-                      joinRoom={() =>
-                        clientMessenger.joinRoom(match.params[ 'roomId' ])}
-                      leaveRoom={() => {
-                        clientMessenger.leaveRoom(clientId, roomId)
-                        props.actions.roomLeft()
-                      }}/>
-        }/>
+        <Route exact path='/' render={this.renderRoomList}/>
+        <Route exact path='/room/:roomId' render={this.renderRoom}/>
       </Switch>
     )
+  }
+
+  private renderRoomList = (): React.ReactNode => {
+    const { props } = this
+    return <RoomList
+      rooms={props.rooms}
+      sendCreateRoom={props.clientMessenger.sendCreateRoom}/>
+  }
+
+  private renderRoom = ({ match }: RouteComponentProps<any>): React.ReactNode => {
+    const { props } = this
+    return <ChatRoom
+      userName={props.userName}
+      room={props.selectedRoom}
+      changeUsername={this.changeUsername}
+      sendMessage={this.sendMessage}
+      joinRoom={() => props.clientMessenger.joinRoom(match.params[ 'roomId' ])}
+      leaveRoom={this.leaveRoom}/>
+  }
+
+  private changeUsername = (name: string) => {
+    const { props } = this
+    const { roomId } = this
+    if (roomId === null) {
+      throw Error('no room ID')
+    }
+    props.clientMessenger.changeUsername(name, props.clientId, this.roomId)
+  }
+
+  private sendMessage = (message: string) => {
+    const { props } = this
+    props.clientMessenger.sendChatMessage(
+      message, props.userName, props.clientId, this.roomId)
+  }
+
+  private leaveRoom = () => {
+    const { props } = this
+    props.clientMessenger.leaveRoom(props.clientId, this.roomId)
+    props.actions.roomLeft()
+  }
+
+  private disconnectHandler = () => {
+    const { props, roomId } = this
+    const { clientId = null, subscriptionId } = props
+    props.clientMessenger.disconnect(subscriptionId, clientId, roomId)
   }
 
   private get roomId(): string | null {

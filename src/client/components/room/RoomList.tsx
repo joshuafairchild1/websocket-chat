@@ -6,26 +6,12 @@ import ModalForm from '../form/ModalForm'
 import './RoomList.scss'
 import { Link } from 'react-router-dom'
 
-interface RoomListProps {
+interface Props {
   rooms: Room[]
   sendCreateRoom: (room: Room) => void
 }
 
-export default class RoomList extends Component<RoomListProps> {
-
-  constructor(props: RoomListProps) {
-    super(props)
-    this.state = { isCreatingRoom: false }
-  }
-
-  createModal(trigger: ReactNode) {
-    return <ModalForm
-      header='Create a chat room'
-      trigger={trigger}
-      onSubmit={(name: string) => this.props.sendCreateRoom(new Room(name))}
-      submitButtonText='Create'
-      allowCancel={true}/>
-  }
+export default class RoomList extends Component<Props> {
 
   render() {
     const { rooms } = this.props
@@ -43,15 +29,28 @@ export default class RoomList extends Component<RoomListProps> {
                 <span className='create-room-link'>create another</span>
               </h4>)}
             <div className='room-links-container'>
-              {rooms.map((room: Room) =>
-                <Link to={`/room/${room._id}`} key={room._id}>
-                  <h5 className='blue-btn fade-in'>
-                    {room.name}
-                  </h5>
-                </Link>)}
+              {rooms.map(RoomLink)}
             </div>
           </div>}
       </div>
     )
   }
+
+  private createModal(trigger: ReactNode) {
+    return <ModalForm
+      header='Create a chat room'
+      trigger={trigger}
+      onSubmit={this.createRoom}
+      submitButtonText='Create'
+      allowCancel={true}/>
+  }
+
+  private createRoom = (name: string) => this.props.sendCreateRoom(new Room(name))
 }
+
+const RoomLink: React.SFC<Room> = props =>
+  <Link to={`/room/${props._id}`} key={props._id}>
+    <h5 className='blue-btn fade-in'>
+      {props.name}
+    </h5>
+  </Link>
