@@ -2,7 +2,7 @@ import * as React from 'react'
 import Room from '../../../shared/model/Room'
 import { Component, ReactNode } from 'react'
 import { Button, Modal } from 'react-materialize'
-import ModalForm from '../form/ModalForm'
+import ModalForm from '../ModalForm'
 import './RoomList.scss'
 import { Link } from 'react-router-dom'
 

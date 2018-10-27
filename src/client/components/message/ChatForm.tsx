@@ -1,35 +1,34 @@
 import * as React from 'react'
 import { FormEvent } from 'react'
 import { Button } from 'react-materialize'
-import ControlledForm from '../form/ControlledForm'
 import './ChatForm.scss'
+import { useFormState } from '../../hooks'
 
-interface ChatFormProps {
-  sendMessage: (message: string) => void
-}
+interface Props { sendMessage: (message: string) => void }
 
-export default class ChatForm extends ControlledForm<ChatFormProps> {
+const ChatForm: React.SFC<Props> = props => {
+  const { inputValue, handleValueChange, resetForm } = useFormState()
 
-  protected handleSubmit = (event: FormEvent<any>) => {
+  function handleSubmit(event: FormEvent<any>) {
     event.preventDefault()
     const [ { value } ] = event.currentTarget
     const trimmed = value.trim()
     if (trimmed !== '') {
-      this.props.sendMessage(trimmed)
-      this.reset()
+      props.sendMessage(trimmed)
+      resetForm()
     }
   }
 
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit} className='chat-form'>
-        <input type='text' className='chat-input'
-               value={this.state.inputValue}
-               onChange={this.handleChange}/>
-        <Button type='submit' className='blue-btn'>
-          Send
-        </Button>
-      </form>
-    )
-  }
+  return (
+    <form onSubmit={handleSubmit} className='chat-form'>
+      <input type='text' className='chat-input'
+             value={inputValue}
+             onChange={handleValueChange}/>
+      <Button type='submit' className='blue-btn'>
+        Send
+      </Button>
+    </form>
+  )
 }
+
+export default ChatForm

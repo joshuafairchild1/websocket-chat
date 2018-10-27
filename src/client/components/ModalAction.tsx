@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { noOp } from '../../../shared/utils'
+import { noOp } from '../../shared/utils'
 import { Button } from 'react-materialize'
 
 type ModalActionProps = {
